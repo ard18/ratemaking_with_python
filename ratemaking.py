@@ -4,11 +4,11 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-pd.set_option("display.max_columns",None)
-
-# lets import streamlit
 import streamlit as st
 import plotly.graph_objs as go
+from sklearn.metrics import mean_absolute_error as mae, r2_score as r2
+import datetime
+pd.set_option("display.max_columns",None)
 
 # create different pages
 
@@ -313,7 +313,7 @@ st.dataframe(proj_ultLosses, width=300)
 """## Lets evaluate the closeness of our projected ultimate losses to the actual ultimate losses."""
 
 # metrics used: mean absolute error, and r^2 coefficient
-from sklearn.metrics import mean_absolute_error as mae, r2_score as r2
+
 # Actual Ultimate Losses
 act_ultLosses = {}
 for i in range(1988,1998):
@@ -339,7 +339,6 @@ https://www.casact.org/abstract/generalized-earned-premium-rate-adjustment-facto
 We exclude any fluctuations arising due to legal changes.
 ## Adjusting Premiums for Rate Changes
 """
-import datetime
 
 # Net Premium Earned (Earned Premium - Ceded Earned Premium(or Reinsurance costs))
 net_prem_earned = {}
@@ -389,7 +388,6 @@ current_cum_rate_index = cum_index[-1]
 st.write("Current Cumulative Rate Level Index =",current_cum_rate_index)
 
 # To calculate the portions earned by premiums under each rate change
-import datetime
 T = 1; E = 1;
 
 def months_between(date1,date2):
@@ -555,7 +553,6 @@ for i in benefit_index:
 current_loss_lvl = loss_lvl[-1]
 # print("Current Loss Level =",current_loss_lvl)
 
-import datetime
 T = 1; E = 1;
 
 def months_between(date1,date2):
