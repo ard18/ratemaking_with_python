@@ -158,11 +158,6 @@ def computeLDF(data):
 def computeAverageLDF(ldf_info, loss_info):
     '''This function computes various Averages of Loss Development Factors
        Here data is of type: dictionary'''
-    # print("Available averaging methods:\n\
-    #         1. Simple Average :- Latest 5\n\
-    #         2. Volume-Weighted Average :- Latest 5\n\
-    #         3. Medial Average :- Latest 5\n\
-    #         4. Geometric Average :- Latest 5\n")
     DK = list(ldf_info.keys())
     DK = sorted(DK, reverse=True)
     trframe = {
@@ -272,7 +267,7 @@ for i in range(0,max_length):
 col3.subheader("Averages of LDFs")
 col3.dataframe(avg_ldf_df)
 
-# Select LDF. Here we take the Volume-Weighted Averages.
+# Select LDF.
 ldf_choices = list(avg_ldf.keys())
 chosen_Ldf = st.selectbox("Select an averaging method for the LDFs:", ldf_choices, index=0, placeholder="Choose an option")
 selected_Ldf = avg_ldf[chosen_Ldf]
@@ -333,8 +328,6 @@ col6.dataframe(proj_ultLosses, width=300)
 
 st.write("Mean Absolute Error =", mae(list(act_ultLosses.values()), list(proj_ultLosses.values())))
 st.write("R^2 coefficient =", r2(list(act_ultLosses.values()), list(proj_ultLosses.values()) ))
-# print( "\nMean Absolute Error =",mae(list(act_ultLosses.values()), list(proj_ultLosses.values())) )
-# print("\nR^2 coefficient =", r2(list(act_ultLosses.values()), list(proj_ultLosses.values()) ) )
 
 """The R^2 coefficient is close to 1, which is very good. This means that Chain-Ladder Method is performing sufficiently well."""
 
