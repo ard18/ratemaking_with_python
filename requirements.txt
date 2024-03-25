@@ -1,7 +1,7 @@
+seaborn
 openpyxl
 streamlit
 numpy
 pandas
 matplotlib
 plotly
-seaborn
