@@ -1,4 +1,4 @@
-sklearn
+sklearn.metrics
 seaborn
 openpyxl
 streamlit
