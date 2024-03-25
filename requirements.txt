@@ -1,3 +1,4 @@
+sklearn
 seaborn
 openpyxl
 streamlit
