@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
 import plotly.graph_objs as go
-from sklearn.metrics import mean_absolute_error as mae, r2_score as r2
+from scikit-learn.metrics import mean_absolute_error as mae, r2_score as r2
 import datetime
 pd.set_option("display.max_columns",None)
 
