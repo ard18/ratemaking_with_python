@@ -770,7 +770,7 @@ st.dataframe(inf_avg_df,hide_index=True)
 
 ## Trend losses for inflation.
 ##### Our experience periods are the historical accident years from 1988 to 1997.
-##### Future policy period begins in Jan 1, 1998. Inflation rate will be in effect for 12 months. Thus our forecast period average accident date is:
+##### We assume future policy period begins on Jan 1, 1998 and inflation rate will be in effect for 12 months. Thus our forecast period average accident date is:
 ##### Midpoint of the period 1/1/1998 to 12/31/1999 = 1/1/1999
 """
 
@@ -780,14 +780,23 @@ for i in inf_index.keys():
     expDate = datetime.date(i,7,1)
     diff = months_between(loss_forecast_Date,expDate)
     loss_inf_period[i] = diff
+st.write("The trending periods for losses are:")
+loss_inf_period_df = pd.DataFrame({
+    "periods":periods,
+    "trending periods":loss_inf_period.keys()
+})
+st.dataframe(loss_inf_period_df,hide_index=True)
 
-# print("The trend periods for losses are :\n", loss_inf_period)
-
+# trend factors
 loss_inf_factor = {}
 for i in loss_inf_period.keys():
     loss_inf_factor[i] = (1 + (0.01*inf_avg[i]))**loss_inf_period[i]
-
-# print("The trend factors for losses are :\n", loss_inf_factor)
+st.write("The trend factors for losses are:")
+loss_inf_factor_df = pd.DataFrame({
+    "periods":periods,
+    "trend factors":loss_inf_factor.keys()
+})
+st.dataframe(loss_inf_factor_df,hide_index=True)
 
 # Now we trend the losses
 inf_trendedLosses = {}
