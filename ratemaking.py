@@ -861,9 +861,17 @@ variable_exp_provision = 0.1    # 10%
 profit_provision = 0.07         # 7%
 ulae_ratio = 0.05               # 5%
 
+st.write("Fixed Expenses provision =",fixed_exp_provision)
+st.write("Variable Expenses provision =",variable_exp_provision)
+st.write("Target Underwriting Profit provision =",profit_provision)
+st.write("ULAE ratio =",ulae_ratio)
+
 # permissible loss ratio
 permissibleLR = 1 - (variable_exp_provision+profit_provision)
-# print("Permissible Loss Ratio = ", round(permissibleLR*100,3),"%")
+st.write("Permissible Loss Ratio = ", round(permissibleLR*100,3),"%")
+
+
+
 
 """# Overall Indicated Rate Change"""
 
@@ -876,7 +884,7 @@ for i in loss_ratio.keys():
     avg_loss_ratio+=loss_ratio[i]
 avg_loss_ratio/=len(loss_ratio.keys())
 avg_loss_ratio*=(1+ulae_ratio)
-# print("Average loss ratio = ",round(avg_loss_ratio*100,2),"%")
+st.write("Average loss ratio = ",round(avg_loss_ratio*100,2),"%")
 
 # if(avg_loss_ratio <= permissibleLR):
 #     print("Since, average loss ratio %.3f is less than permissible loss ratio %.3f,\nThe Company met underwriting profit expectations.\n"%(avg_loss_ratio,permissibleLR))
@@ -885,6 +893,5 @@ avg_loss_ratio*=(1+ulae_ratio)
 
 # find overall rate level indicated change
 indicated_avg_rate_change = ((avg_loss_ratio+fixed_exp_provision)/(1-variable_exp_provision-profit_provision)) - 1
-# print("Indicated average rate change for is=",round(indicated_avg_rate_change*100,4),"%")
+st.write("Indicated average rate change for is=",round(indicated_avg_rate_change*100,4),"%")
 
-st.write("Overall change",round(indicated_avg_rate_change*100,4))
