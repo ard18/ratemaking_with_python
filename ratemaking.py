@@ -802,10 +802,8 @@ st.dataframe(loss_inf_factor_df,hide_index=True)
 inf_trendedLosses = {}
 for i in loss_inf_factor.keys():
     inf_trendedLosses[i] = AdjustedLosses[i]*loss_inf_factor[i]
-
-# print("The Projected_Ultimate_Losses\tBenefit_Adjusted_Losses\tInflation_Trended_Losses are:\n")
-# for i in inf_trendedLosses.keys():
-#     print(i,"\t  ===>",proj_ultLosses[i],"\t ===>",AdjustedLosses[i],"\t==>",inf_trendedLosses[i])
+st.write("Losses trended for inflation:")
+_df(inf_trendedLosses,"Inflation Trended Losses")
 
 """## Trend Premiums for inflation.
 ##### Trend will be estimated from earned premium data. The trend period will be from the average earned date in each historical period to the average earned date at the new rate level. Because of the uniform assumption, the average earned date of a period is the midpoint of the first and last dates that premiums could be earned in that period. So, these dates will depend on the policy term length.
