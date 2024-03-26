@@ -18,7 +18,7 @@ st.title("Worker's Compensation")
 st.subheader("Pricing(Ratemaking) Worker's Compensation Premiums using Actuarial Techniques")
 
 # our csv file
-filepath = "./wkcomp_pos.csv"
+filepath = "ratemaking_with_python/wkcomp_pos.csv"
 
 # load the dataset
 @st.cache_data # for faster execution
@@ -521,10 +521,16 @@ for i in onlevel.keys():
     AdjustedPrem[i] = round( net_prem_earned[i] * onlevel[i], 5)
 AdjustedPrem_df = pd.DataFrame({
     "Accident Year": AdjustedPrem.keys(),
-    "Average Cumulative Rate Level Indices":AdjustedPrem.values() 
+    "Rate Level Adjusted Premiums(Net)":AdjustedPrem.values() 
 })
 st.subheader("Premiums adjusted for rate level changes:")
 st.dataframe(AdjustedPrem_df, hide_index=True)
+
+
+
+
+
+
 
 """## Adjusting Losses for Benefit Changes"""
 
@@ -548,15 +554,23 @@ st.dataframe(benefit_changes_df, hide_index=True)
 # first calculate the benefit change indeces
 benefits = list(benefit_changes.values())
 benefit_index =[1.00]+[ (1+i) for i in benefits ] # including initial index without changes = 1.00 (rate change = 0%)
+benefit_index_df = pd.DataFrame({
+    "Benefit index":benefit_index
+})
+st.dataframe(benefit_index_df, hide_index=True)
 
 loss_lvl = []
 f = 1
 for i in benefit_index:
     f *= i
     loss_lvl.append( round(f, 4))
-# print("Loss Level indeces (Cumulative indeces):\n",loss_lvl)
+loss_lvl_df = pd.DataFrame({
+    'loss level index':loss_lvl
+})
+st.dataframe(loss_lvl_df,hide_index=True)
+
 current_loss_lvl = loss_lvl[-1]
-# print("Current Loss Level =",current_loss_lvl)
+st.write("Current Loss Level Index =",current_loss_lvl)
 
 T = 1; E = 1;
 
@@ -634,7 +648,6 @@ def LossPortion(ben_dates, loss_years):
             else:
                 portion[i].append(0)
 
-    # print(portion)
     for i in portion.keys():
         portion[i] = find_remains(ben_dates, i, portion[i])
     return(portion)
@@ -643,10 +656,15 @@ def LossPortion(ben_dates, loss_years):
 ben_effec_dates = list( benefit_changes.keys())
 years_toAdjust = list( proj_ultLosses.keys() )
 LossesPortion = LossPortion(ben_effec_dates, years_toAdjust)
-# print("The portion of the losses in the years w.r.t. the benefit changes are:\n",LossesPortion)
+LossesPortion_df = pd.DataFrame({
+    "Accident Years":LossesPortion.keys(),
+    "Loss Portions": LossesPortion.values()
+})
+st.subheader("The portion of the losses in the years w.r.t. the benefit changes are:\n")
+st.dataframe(LossesPortion_df,hide_index=True)
+
 
 # Average Loss Levels
-
 def AvgLossLevel(L, loss_levels):
     '''This function calculates the average Loss levels for the historical periods
     L, loss_levels are numpy arrays where L contains the portions of losses and loss_levels contains the loss levels'''
@@ -663,27 +681,40 @@ loss_lvl = np.array(loss_lvl)
 avg_LossLvl = {}
 for i in LossesPortion.keys():
     avg_LossLvl[i] = AvgLossLevel(LossesPortion[i], loss_lvl)
-
-# print("\nThe Average Loss Levels are:")
-# for i in avg_LossLvl.keys():
-#     print(i,"\t==>",avg_LossLvl[i])
+avg_LossLvl_df = pd.DataFrame({
+    "Accident Year": avg_LossLvl.keys(),
+    "Average Loss Level Indices":avg_LossLvl.values() 
+})
+st.subheader("Average Loss level Indices for the respective accident years")
+st.dataframe(avg_LossLvl_df, hide_index=True)
 
 # Adjustment Factors
 adjusts = {}
-# print("Current Loss Level =",current_loss_lvl)
+st.write("Current Loss Level =",current_loss_lvl)
 for i in avg_LossLvl.keys():
     adjusts[i] = round( current_loss_lvl/avg_LossLvl[i], 5 )
-# print("\nThe Adjustment Factors are:")
-# for i in adjusts.keys():
-#     print(i,"\t==>",adjusts[i])
+adjusts_df = pd.DataFrame({
+    "Accident Year": adjusts.keys(),
+    "Adjustment Factors":adjusts.values() 
+})
+st.subheader("Adjustment Factors for the losses")
+st.dataframe(adjusts_df, hide_index=True)
 
 # Adjusting the Losses
 AdjustedLosses = {}
 for i in adjusts.keys():
     AdjustedLosses[i] = round( proj_ultLosses[i] * adjusts[i], 5)
-# print("The Adjusted Losses are:\n")
-# for i in AdjustedLosses.keys():
-#     print(i,"\t==>",AdjustedLosses[i])
+AdjustedLosses_df = pd.DataFrame({
+    "Accident Year": AdjustedLosses.keys(),
+    "Benefit Adjusted Losses ":AdjustedLosses.values() 
+})
+st.subheader("Losses adjusted for benefit changes:")
+st.dataframe(AdjustedLosses_df, hide_index=True)
+
+
+
+
+
 
 """# Trending Loss Ratios
 
@@ -691,23 +722,26 @@ for i in adjusts.keys():
 """
 
 # Lets work on Inflation Rates first
-filepath = "./605_InflationRates.xlsx"
+filepath = "ratemaking_with_python/605_InflationRates.xlsx"
 
 inflation_rates = pd.read_excel(filepath)
 inflation_rates
 
 # inflation rates in USA
 inf_us = inflation_rates[inflation_rates['Country Name'] == "United States"]
-inf_us
-
-inf_us.iloc[0,1998-1960+4]
+st.write("We extract the inflation rates for the USA:",inf_us)
 
 inf_index = {}
 start = 1988; end = 1997
 for i in range(start, end+1):
     inf_index[i] = inf_us.iloc[0, i-1960+4]
 
-# print("Inflation indeces are:\n",inf_index)
+st.write("Inflation indeces from 1988 to 1997 in the US are:\n")
+inf_index_df = pd.DataFrame({
+    "Accident Years": inf_index.keys(),
+    "Inflation rate":inf_index.values()
+})
+st.dataframe(inf_index_df, hide_index=True)
 
 inf_avg = {}
 keys = list(inf_index.keys())
