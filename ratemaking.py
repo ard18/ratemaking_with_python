@@ -722,7 +722,7 @@ st.dataframe(AdjustedLosses_df, hide_index=True)
 """
 
 # Lets work on Inflation Rates first
-filepath = "./ratemaking_with_python/605_InflationRates.xlsx"
+filepath = "ratemaking_with_python/605_InflationRates.xlsx"
 
 inflation_rates = pd.read_excel(filepath)
 inflation_rates
