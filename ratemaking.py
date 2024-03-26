@@ -22,11 +22,11 @@ filepath = "ratemaking_with_python/wkcomp_pos.csv"
 
 # load the dataset
 @st.cache_data # for faster execution
-def load_data():
+def load_data(filepath):
     df = pd.DataFrame(pd.read_csv(filepath))
     return df
 '''##### - This is our dataset'''
-dataset = load_data()
+dataset = load_data(filepath)
 st.dataframe(dataset) # the worker's compensation dataset
 
 # dataset columns
@@ -722,9 +722,10 @@ st.dataframe(AdjustedLosses_df, hide_index=True)
 """
 
 # Lets work on Inflation Rates first
-filepath = "ratemaking_with_python/605_InflationRates.xlsx"
+filepath = "ratemaking_with_python/605_InflationRates.csv"
 
-inflation_rates = pd.read_excel(filepath)
+# load the inflation dataset
+inflation_rates = load_data(filepath)
 inflation_rates
 
 # inflation rates in USA
