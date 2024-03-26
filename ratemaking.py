@@ -744,6 +744,13 @@ inf_index_df = pd.DataFrame({
 })
 st.dataframe(inf_index_df, hide_index=True)
 
+def _df(ds, val_col):
+    ds_df = pd.DataFrame({
+        "Accident Year":ds.keys(),
+        val_col: ds.values()
+    })
+    st.dataframe(ds_df, hide_index=True)
+
 inf_avg = {}
 keys = list(inf_index.keys())
 for i in range(0,len(keys)):
@@ -751,8 +758,7 @@ for i in range(0,len(keys)):
     for j in range(i,len(keys)):
         avg+= inf_index[keys[j]]
     inf_avg[keys[i]] = avg/(j-i+1)
-
-# print("Average Inflation rates =",inf_avg)
+_df(inf_avg, "Average Inflation Rates")
 
 """## Our Assumptions are:
 ### --> Policies are written uniformly over time.
