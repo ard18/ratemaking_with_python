@@ -753,7 +753,13 @@ for i in range(0,len(keys)):
         avg+= inf_index[keys[j]]
     periods.append(temp)
     inf_avg[keys[i]] = avg/(j-i+1)
-periods
+
+st.write("The average inflation rates are:")
+inf_avg_df = pd.DataFrame({
+    "periods":periods.keys(),
+    "average inflation":inf_avg.keys()
+})
+st.dataframe(inf_avg_df,hide_index=True)
 
 
 """## Our Assumptions are:
