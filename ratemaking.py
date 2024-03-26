@@ -861,10 +861,10 @@ variable_exp_provision = 0.1    # 10%
 profit_provision = 0.07         # 7%
 ulae_ratio = 0.05               # 5%
 
-st.write("Fixed Expenses provision =",fixed_exp_provision)
-st.write("Variable Expenses provision =",variable_exp_provision)
-st.write("Target Underwriting Profit provision =",profit_provision)
-st.write("ULAE ratio =",ulae_ratio)
+st.write("Fixed Expenses provision =",fixed_exp_provision*100,"%")
+st.write("Variable Expenses provision =",variable_exp_provision*100,"%")
+st.write("Target Underwriting Profit provision =",profit_provision*100,"%")
+st.write("ULAE ratio =",ulae_ratio*100,"%")
 
 # permissible loss ratio
 permissibleLR = 1 - (variable_exp_provision+profit_provision)
@@ -886,10 +886,10 @@ avg_loss_ratio/=len(loss_ratio.keys())
 avg_loss_ratio*=(1+ulae_ratio)
 st.write("Average loss ratio = ",round(avg_loss_ratio*100,2),"%")
 
-# if(avg_loss_ratio <= permissibleLR):
-#     print("Since, average loss ratio %.3f is less than permissible loss ratio %.3f,\nThe Company met underwriting profit expectations.\n"%(avg_loss_ratio,permissibleLR))
-# else :
-#     print("Since, average loss ratio %.3f is greater than permissible loss ratio %.3f,\nThe Company did not meet underwriting profit expectations.\n"%(avg_loss_ratio,permissibleLR))
+if(avg_loss_ratio <= permissibleLR):
+    st.write("Since, average loss ratio %.3f is less than permissible loss ratio %.3f,\nThe Company met underwriting profit expectations.\n"%(avg_loss_ratio,permissibleLR))
+else :
+    st.write("Since, average loss ratio %.3f is greater than permissible loss ratio %.3f,\nThe Company did not meet underwriting profit expectations.\n"%(avg_loss_ratio,permissibleLR))
 
 # find overall rate level indicated change
 indicated_avg_rate_change = ((avg_loss_ratio+fixed_exp_provision)/(1-variable_exp_provision-profit_provision)) - 1
