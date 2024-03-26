@@ -748,11 +748,10 @@ periods = []
 keys = list(inf_index.keys())
 for i in range(0,len(keys)):
     avg=0
-    
+    temp = str(keys[i])+"-1997"
     for j in range(i,len(keys)):
         avg+= inf_index[keys[j]]
-    str = keys[i]+"-"+keys[j]
-    periods.append(str)
+    periods.append(temp)
     inf_avg[keys[i]] = avg/(j-i+1)
 periods
 
