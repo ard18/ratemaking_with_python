@@ -540,10 +540,15 @@ benefit_changes = {
             #     datetime.date(1994,2,1):0.08,
             datetime.date(1996,8,1):0.15
                 }
+benefit_changes_df = pd.DataFrame({
+    "benefit change dates":benefit_changes.keys(),
+    "benefit changes ":benefit_changes.values()
+})
+st.dataframe(benefit_changes_df, hide_index=True)
 # first calculate the benefit change indeces
 benefits = list(benefit_changes.values())
 benefit_index =[1.00]+[ (1+i) for i in benefits ] # including initial index without changes = 1.00 (rate change = 0%)
-# print("Benefit change indeces:\n",benefit_index)
+
 loss_lvl = []
 f = 1
 for i in benefit_index:
