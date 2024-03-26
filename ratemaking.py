@@ -783,7 +783,7 @@ for i in inf_index.keys():
 st.write("The trending periods for losses are:")
 loss_inf_period_df = pd.DataFrame({
     "periods":periods,
-    "trending periods":loss_inf_period.keys()
+    "trending periods":loss_inf_period.values()
 })
 st.dataframe(loss_inf_period_df,hide_index=True)
 
@@ -794,7 +794,7 @@ for i in loss_inf_period.keys():
 st.write("The trend factors for losses are:")
 loss_inf_factor_df = pd.DataFrame({
     "periods":periods,
-    "trend factors":loss_inf_factor.keys()
+    "trend factors":loss_inf_factor.values()
 })
 st.dataframe(loss_inf_factor_df,hide_index=True)
 
@@ -822,7 +822,7 @@ for i in inf_index.keys():
 st.write("The trending periods for premiums are:")
 prem_inf_period_df = pd.DataFrame({
     "periods":periods,
-    "trending periods":prem_inf_period.keys()
+    "trending periods":prem_inf_period.values()
 })
 st.dataframe(prem_inf_period_df,hide_index=True)
 
@@ -833,7 +833,7 @@ for i in prem_inf_period.keys():
 st.write("The trend factors for premiums are:")
 prem_inf_factor_df = pd.DataFrame({
     "periods":periods,
-    "trend factors":prem_inf_factor.keys()
+    "trend factors":prem_inf_factor.values()
 })
 st.dataframe(prem_inf_factor_df,hide_index=True)
 
@@ -843,6 +843,13 @@ for i in prem_inf_factor.keys():
     inf_trendedPrems[i] = AdjustedPrem[i]*prem_inf_factor[i]
 st.write("Premiums trended for inflation:")
 _df(inf_trendedPrems,"Inflation Trended Premiums")
+
+
+
+
+
+
+
 
 """# Expenses and Profits
 
