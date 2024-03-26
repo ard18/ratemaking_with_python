@@ -10,7 +10,13 @@ from sklearn.metrics import mean_absolute_error as mae, r2_score as r2
 import datetime
 pd.set_option("display.max_columns",None)
 
-# create different pages
+# display various dataframes
+def _df(ds, val_col):
+    ds_df = pd.DataFrame({
+        "Accident Year":ds.keys(),
+        val_col: ds.values()
+    })
+    st.dataframe(ds_df, hide_index=True)
 
 # home page configs 
 st.set_page_config(layout="wide")
@@ -308,7 +314,8 @@ for i in range(0, len(cdf)):
         if(i==j):
             proj_ultLosses[ list(loss_triangle.keys())[j] ] = round( list(loss_triangle.values())[i][-1]*cdf[i],4)
 st.subheader("Projected Ultimate Losses")
-st.dataframe(proj_ultLosses, width=300)
+_df(proj_ultLosses,"Projected Ultimate Losses")
+#st.dataframe(proj_ultLosses, width=300)
 
 """## Lets evaluate the closeness of our projected ultimate losses to the actual ultimate losses."""
 
@@ -743,13 +750,6 @@ inf_index_df = pd.DataFrame({
     "Inflation rate":inf_index.values()
 })
 st.dataframe(inf_index_df, hide_index=True)
-
-def _df(ds, val_col):
-    ds_df = pd.DataFrame({
-        "Accident Year":ds.keys(),
-        val_col: ds.values()
-    })
-    st.dataframe(ds_df, hide_index=True)
 
 inf_avg = {}
 keys = list(inf_index.keys())
