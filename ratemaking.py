@@ -315,7 +315,6 @@ for i in range(0, len(cdf)):
             proj_ultLosses[ list(loss_triangle.keys())[j] ] = round( list(loss_triangle.values())[i][-1]*cdf[i],4)
 st.subheader("Projected Ultimate Losses")
 _df(proj_ultLosses,"Projected Ultimate Losses")
-#st.dataframe(proj_ultLosses, width=300)
 
 """## Lets evaluate the closeness of our projected ultimate losses to the actual ultimate losses."""
 
@@ -351,12 +350,8 @@ We exclude any fluctuations arising due to legal changes.
 net_prem_earned = {}
 for i in range(1988,1998):
     net_prem_earned[i] = list( loss_data[loss_data['AccidentYear']==i]['EarnedPremNet_D'] )[0]
-net_prem_earned_df = pd.DataFrame({
-    "Accident Year":net_prem_earned.keys(),
-    "Earned Premium Net":net_prem_earned.values()
-})
 st.subheader("Earned Premium (Net)")
-st.dataframe(net_prem_earned_df, hide_index=True)
+_df(net_prem_earned,"Earned Premium Net")
 
 """We will assume some rate changes."""
 
