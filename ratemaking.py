@@ -787,7 +787,7 @@ loss_inf_period_df = pd.DataFrame({
 })
 st.dataframe(loss_inf_period_df,hide_index=True)
 
-# trend factors
+# trend factors for losses
 loss_inf_factor = {}
 for i in loss_inf_period.keys():
     loss_inf_factor[i] = (1 + (0.01*inf_avg[i]))**loss_inf_period[i]
@@ -805,6 +805,8 @@ for i in loss_inf_factor.keys():
 st.write("Losses trended for inflation:")
 _df(inf_trendedLosses,"Inflation Trended Losses")
 
+
+
 """## Trend Premiums for inflation.
 ##### Trend will be estimated from earned premium data. The trend period will be from the average earned date in each historical period to the average earned date at the new rate level. Because of the uniform assumption, the average earned date of a period is the midpoint of the first and last dates that premiums could be earned in that period. So, these dates will depend on the policy term length.
 ##### Future policy period begins in Jan 1, 1998. Inflation rate will be in effect for 12 months. Thus our forecast period average earned date is:
@@ -817,23 +819,30 @@ for i in inf_index.keys():
     expDate = datetime.date(i,1,1)
     diff = months_between(prem_forecast_Date,expDate)
     prem_inf_period[i] = diff
+st.write("The trending periods for premiums are:")
+prem_inf_period_df = pd.DataFrame({
+    "periods":periods,
+    "trending periods":prem_inf_period.keys()
+})
+st.dataframe(prem_inf_period_df,hide_index=True)
 
-# print("The trend periods for premium are :\n", prem_inf_period)
-
+# trend factors for premiums
 prem_inf_factor = {}
 for i in prem_inf_period.keys():
     prem_inf_factor[i] = (1 + (0.01*inf_avg[i]))**prem_inf_period[i]
-
-# print("The trend factors for premium are :\n", prem_inf_factor)
+st.write("The trend factors for premiums are:")
+prem_inf_factor_df = pd.DataFrame({
+    "periods":periods,
+    "trend factors":prem_inf_factor.keys()
+})
+st.dataframe(prem_inf_factor_df,hide_index=True)
 
 # Now we trend the premiums
 inf_trendedPrems = {}
 for i in prem_inf_factor.keys():
     inf_trendedPrems[i] = AdjustedPrem[i]*prem_inf_factor[i]
-
-# print("The Net_Premiums_Earned\tRate_Adjusted_Premiums\tInflation_Trended_Premiums are:\n")
-# for i in inf_trendedPrems.keys():
-#     print(i,"\t  ===>",net_prem_earned[i],"\t ===>",AdjustedPrem[i],"\t==>",inf_trendedPrems[i])
+st.write("Premiums trended for inflation:")
+_df(inf_trendedPrems,"Inflation Trended Premiums")
 
 """# Expenses and Profits
 
