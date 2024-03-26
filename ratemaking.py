@@ -740,20 +740,22 @@ for i in range(start, end+1):
     inf_index[i] = inf_us.iloc[0, i-1960+4]
 
 st.write("Inflation indeces from 1988 to 1997 in the US are:\n")
-inf_index_df = pd.DataFrame({
-    "Accident Years": inf_index.keys(),
-    "Inflation rate":inf_index.values()
-})
-st.dataframe(inf_index_df, hide_index=True)
+_df(inf_index, "Inflation rate")
 
+# average inflation rates
 inf_avg = {}
+periods = []
 keys = list(inf_index.keys())
 for i in range(0,len(keys)):
     avg=0
+    
     for j in range(i,len(keys)):
         avg+= inf_index[keys[j]]
+    str = keys[i]+"-"+keys[j]
+    periods.append(str)
     inf_avg[keys[i]] = avg/(j-i+1)
-_df(inf_avg, "Average Inflation Rates")
+periods
+
 
 """## Our Assumptions are:
 ### --> Policies are written uniformly over time.
