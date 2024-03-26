@@ -756,7 +756,7 @@ for i in range(0,len(keys)):
 
 st.write("The average inflation rates are:")
 inf_avg_df = pd.DataFrame({
-    "periods":periods.keys(),
+    "periods":periods,
     "average inflation":inf_avg.keys()
 })
 st.dataframe(inf_avg_df,hide_index=True)
