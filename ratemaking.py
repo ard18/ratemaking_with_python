@@ -357,7 +357,7 @@ _df(net_prem_earned,"Earned Premium Net")
 
 # Assume rate changes (for now, values are taken similar to those in Massachusetts Rate Filings)
 rate_changes = {
-            datetime.date(1988,4,1):0.199, #datetime.date(1989,1,1):0.1,
+            datetime.date(1988,4,1):0.198, #datetime.date(1989,1,1):0.1,
                 datetime.date(1990,7,1):0.262, #datetime.date(1991,4,1):-0.04,
             datetime.date(1991,5,1):0.113,  #datetime.date(1992,3,1):0.07,
             datetime.date(1993,8,1):0.062, #datetime.date(1994,2,1):0.08,
