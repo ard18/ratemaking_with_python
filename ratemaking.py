@@ -353,15 +353,15 @@ for i in range(1988,1998):
 st.subheader("Earned Premium (Net)")
 _df(net_prem_earned,"Earned Premium Net")
 
-"""We will assume some rate changes."""
+"""Assume some rate changes (Other rate changes can be assumed)."""
 
-# Assume rate changes
+# Assume rate changes (for now, values are taken similar to those in Massachusetts Rate Filings)
 rate_changes = {
-            datetime.date(1988,4,1):0.05, #datetime.date(1989,1,1):0.1,
-                datetime.date(1990,7,1):-0.02, #datetime.date(1991,4,1):-0.04,
-            datetime.date(1991,5,1):0.11,  #datetime.date(1992,3,1):0.07,
-            datetime.date(1993,8,1):-0.05, #datetime.date(1994,2,1):0.08,
-            datetime.date(1996,8,1):0.15
+            datetime.date(1988,4,1):0.199, #datetime.date(1989,1,1):0.1,
+                datetime.date(1990,7,1):0.262, #datetime.date(1991,4,1):-0.04,
+            datetime.date(1991,5,1):0.113,  #datetime.date(1992,3,1):0.07,
+            datetime.date(1993,8,1):0.062, #datetime.date(1994,2,1):0.08,
+            datetime.date(1996,5,1):-0.122
                 }
 rate_changes_df = pd.DataFrame({
     "rate change dates":rate_changes.keys(),
@@ -535,18 +535,18 @@ st.dataframe(AdjustedPrem_df, hide_index=True)
 
 
 """## Adjusting Losses for Benefit Changes"""
-
-# Assume benefit changes
+"""Assume some benefit changes (Other benefit changes can be assumed)."""
+# Assume benefit changes (Other benefit changes can be assumed)
 benefit_changes = {
-            datetime.date(1988,4,1):0.05,
-            #     datetime.date(1989,1,1):0.1,
-            datetime.date(1990,7,1):-0.02,
-            #     datetime.date(1991,4,1):-0.04,
-            datetime.date(1991,5,1):0.11,
-            #     datetime.date(1992,3,1):0.07,
-            datetime.date(1993,8,1):-0.05,
-            #     datetime.date(1994,2,1):0.08,
-            datetime.date(1996,8,1):0.15
+            # datetime.date(1988,4,1):0.05,
+                 datetime.date(1989,1,1):0.1,
+            # datetime.date(1990,7,1):-0.02,
+                 datetime.date(1991,4,1):-0.04,
+            # datetime.date(1991,5,1):0.11,
+                 datetime.date(1992,3,1):0.07,
+            # datetime.date(1993,8,1):-0.05,
+                 datetime.date(1994,2,1):0.08,
+            # datetime.date(1996,8,1):0.15
                 }
 benefit_changes_df = pd.DataFrame({
     "benefit change dates":benefit_changes.keys(),
