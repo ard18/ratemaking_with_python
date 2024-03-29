@@ -247,22 +247,19 @@ st.dataframe(df,width=1000)
 
 # averages of ldf
 avg_ldf = computeAverageLDF(ldf_triangle, loss_triangle)
-
 col3,col4 = st.columns(2, gap="large")
 
 # Plot line chart
 fig = go.Figure()
-
 # Add lines for each list
 for key, values in avg_ldf.items():
     fig.add_trace(go.Scatter(x=list(range(1, len(values) + 1)), y=values, mode='lines', name=key))
-
 # Customize layout
 fig.update_layout(title='Trend in Averages',
                   xaxis_title='Data Points', yaxis_title='Values')
-
 # Display the chart
 col4.plotly_chart(fig)
+
 avg_ldf_df = pd.DataFrame(
     {
     'Simple Average':avg_ldf['SimpleAvg'],
@@ -377,7 +374,21 @@ with col8:
     st.write("R^2 coefficient based on Chain-Ladder values =", round( r2(list(act_ultLosses.values()), list(proj_ultLosses.values()) ),3))
 
 """The R^2 coefficients are close to 1, which is very good. This means that both GLM and Chain-Ladder Method provide a good fit between the projected values and actual values."""
-
+ultLosses_dict = ({
+    "Chain-Ladder":proj_ultLosses.values(),
+    "GLM":glmUlt_Losses.values(),
+    "Actual":act_ultLosses.values()
+})
+# Plot line chart
+fig2 = go.Figure()
+# Add lines for each list
+for key, values in ultLosses_dict.items():
+    fig2.add_trace(go.Scatter(x=list(range(1, len(values) + 1)), y=values, mode='lines', name=key))
+# Customize layout
+fig2.update_layout(title='Ultimate Losses',
+                  xaxis_title='Data Points', yaxis_title='Values')
+# Display the chart
+st.plotly_chart(fig2)
 
 """# Calculating Rate and Benefit Adjustment Factors
 We use a simple general formula derived by Richard A. Bill for automating the calculation of rate and benefit adjustment factors. This is based on the parallelogram method. More details on the formula can be found in the paper by Richard A. Bill on:
