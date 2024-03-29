@@ -374,6 +374,10 @@ with col8:
     st.write("R^2 coefficient based on Chain-Ladder values =", round( r2(list(act_ultLosses.values()), list(proj_ultLosses.values()) ),3))
 
 """The R^2 coefficients are close to 1, which is very good. This means that both GLM and Chain-Ladder Method provide a good fit between the projected values and actual values."""
+"""### Select the losses of the method producing lower MAE"""
+ULT_LOSSES = proj_ultLosses if mae1<mae2 else glmUlt_Losses
+_df(ULT_LOSSES,"Selected Ultimate Losses")
+
 ultLosses_dict = ({
     "Chain-Ladder":proj_ultLosses.values(),
     "GLM":glmUlt_Losses.values(),
@@ -708,7 +712,7 @@ def LossPortion(ben_dates, loss_years):
 
 
 ben_effec_dates = list( benefit_changes.keys())
-years_toAdjust = list( proj_ultLosses.keys() )
+years_toAdjust = list( ULT_LOSSES.keys() )
 LossesPortion = LossPortion(ben_effec_dates, years_toAdjust)
 LossesPortion_df = pd.DataFrame({
     "Accident Years":LossesPortion.keys(),
@@ -757,7 +761,7 @@ st.dataframe(adjusts_df, hide_index=True)
 # Adjusting the Losses
 AdjustedLosses = {}
 for i in adjusts.keys():
-    AdjustedLosses[i] = round( proj_ultLosses[i] * adjusts[i], 5)
+    AdjustedLosses[i] = round( ULT_LOSSES[i] * adjusts[i], 5)
 AdjustedLosses_df = pd.DataFrame({
     "Accident Year": AdjustedLosses.keys(),
     "Benefit Adjusted Losses ":AdjustedLosses.values() 
