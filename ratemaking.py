@@ -383,7 +383,7 @@ ultLosses_dict = ({
 fig2 = go.Figure()
 # Add lines for each list
 for key, values in ultLosses_dict.items():
-    fig2.add_trace(go.Scatter(x=list(range(1, len(values) + 1)), y=values, mode='lines', name=key))
+    fig2.add_trace(go.Scatter(x=list(range(1, len(values) + 1)), y=list(values), mode='lines', name=key))
 # Customize layout
 fig2.update_layout(title='Ultimate Losses',
                   xaxis_title='Data Points', yaxis_title='Values')
