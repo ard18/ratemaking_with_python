@@ -927,8 +927,8 @@ _df(inf_trendedPrems,"Inflation Trended Premiums")
 
 fixed_exp_provision = 0.08      # 8%
 variable_exp_provision = 0.1    # 10%
-profit_provision = 0.07         # 7%
-ulae_ratio = 0.05               # 5%
+profit_provision = 0.015         # 1.5%
+ulae_ratio = 0.09               # 9%
 
 st.write("Fixed Expenses provision =",fixed_exp_provision*100,"%")
 st.write("Variable Expenses provision =",variable_exp_provision*100,"%")
