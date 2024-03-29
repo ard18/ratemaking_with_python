@@ -367,15 +367,15 @@ col5.dataframe(act_ultLosses, width=300)
 col6.subheader("Projected Ultimate Losses")
 col6.dataframe(proj_ultLosses, width=300)
 col7.subheader("GLM Projected Ultimate Losses")
-col6.dataframe(glmUlt_Losses, width=300)
+col7.dataframe(glmUlt_Losses, width=300)
 
 col8, col9 = st.columns(2)
 with col9:
-    st.write( "\nMean Absolute Error based on GLM values =",mae(list(act_ultLosses.values()), list(glmUlt_Losses.values()) ))
-    st.write("\nR^2 coefficient based on GLM values =", r2(list(act_ultLosses.values()), list(glmUlt_Losses.values() ) ))
+    st.write( "\nMean Absolute Error based on GLM values =",round( mae(list(act_ultLosses.values()), list(glmUlt_Losses.values()) ),3))
+    st.write("\nR^2 coefficient based on GLM values =", round( r2(list(act_ultLosses.values()), list(glmUlt_Losses.values() ) ),3) )
 with col8:
-    st.write("Mean Absolute Error based on Chain-Ladder values =", mae(list(act_ultLosses.values()), list(proj_ultLosses.values())))
-    st.write("R^2 coefficient based on Chain-Ladder values =", r2(list(act_ultLosses.values()), list(proj_ultLosses.values()) ))
+    st.write("Mean Absolute Error based on Chain-Ladder values =", round( mae(list(act_ultLosses.values()), list(proj_ultLosses.values())),3))
+    st.write("R^2 coefficient based on Chain-Ladder values =", round( r2(list(act_ultLosses.values()), list(proj_ultLosses.values()) ),3))
 
 """The R^2 coefficients are close to 1, which is very good. This means that both GLM and Chain-Ladder Method provide a good fit between the projected values and actual values."""
 
