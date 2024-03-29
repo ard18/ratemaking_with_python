@@ -8,6 +8,8 @@ import streamlit as st
 import plotly.graph_objs as go
 from sklearn.metrics import mean_absolute_error as mae, r2_score as r2
 import datetime
+import statsmodels.api as sm
+import warnings
 pd.set_option("display.max_columns",None)
 
 # display various dataframes
@@ -222,11 +224,44 @@ max_length = max(len(arr) for arr in loss_triangle.values())
 # Pad the arrays with NaN to make them all the same length
 data_padded = {key: arr + [np.nan] * (max_length - len(arr)) for key, arr in loss_triangle.items()}
 # Create DataFrame from the padded dictionary
-df = pd.DataFrame.from_dict(data_padded)
-df = df.T
+loss_df = pd.DataFrame.from_dict(data_padded)
+loss_df = loss_df.T
 for i in range(0,max_length):
-    df.rename(columns={i:(i+1)*12,}, inplace=True)
-st.dataframe(df,width=1000)
+    loss_df.rename(columns={i:(i+1)*12,}, inplace=True)
+st.dataframe(loss_df,width=1000)
+
+'''## Using GLMs for projecting Ultimate Losses'''
+def GLM_UltClaims(dataset):
+    '''The dataset used here is a dataframe.
+    This function outputs a dataframe having projected the lower half of the original dataset, i.e., projected losses'''
+    # dataset is a dataframe
+    warnings.filterwarnings("ignore", category=RuntimeWarning)
+    i = 0
+    k = 9
+    while i<9:
+        x_train = [ dataset.iloc[j,i] for j in range(0,k)   ]
+        y_train = [ dataset.iloc[j,i+1] for j in range(0,k) ]
+        x_test =  [ dataset.iat[j,i] for j in range(k,10)   ]
+
+        glm_model = sm.GLM(y_train,x_train,family=sm.families.Gaussian()) # using gaussian glm
+        model_results = glm_model.fit(method="bfgs")
+        y_test = model_results.predict(x_test)
+
+        for j in range(0,len(y_test)):
+            dataset.iat[k+j,i+1] = y_test[j]
+        i+=1
+        k-=1
+    return dataset
+data = GLM_UltClaims(loss_df)
+st.write("Dataframe with GLM projected losses in the lower triangle")
+data
+# GLM projected ultimate Losses
+glmUlt_Losses = {}
+for i in range(0,len(loss_triangle.keys())):
+    glmUlt_Losses[list(loss_triangle.keys())[i]] = data.iat[i,9]
+_df(glmUlt_Losses,"GLM Projected Ultimate Losses")
+
+
 
 # triangle of LDFs
 st.write("Loss Development Factors")
@@ -331,11 +366,17 @@ col5.subheader("Actual Ultimate Losses")
 col5.dataframe(act_ultLosses, width=300)
 col6.subheader("Projected Ultimate Losses")
 col6.dataframe(proj_ultLosses, width=300)
+col7.subheader("GLM Projected Ultimate Losses")
+col6.dataframe(glmUlt_Losses, width=300)
 
-st.write("Mean Absolute Error =", mae(list(act_ultLosses.values()), list(proj_ultLosses.values())))
-st.write("R^2 coefficient =", r2(list(act_ultLosses.values()), list(proj_ultLosses.values()) ))
+col8, col9 = st.columns(2)
+col9.write( "\nMean Absolute Error based on GLM values =",mae(list(act_ultLosses.values()), list(glmUlt_Losses.values()) ))
+col9.write("\nR^2 coefficient based on GLM values =", r2(list(act_ultLosses.values()), list(glmUlt_Losses.values() ) ))
 
-"""The R^2 coefficient is close to 1, which is very good. This means that Chain-Ladder Method is performing sufficiently well."""
+col8.write("Mean Absolute Error based on Chain-Ladder values =", mae(list(act_ultLosses.values()), list(proj_ultLosses.values())))
+col8.write("R^2 coefficient based on Chain-Ladder values =", r2(list(act_ultLosses.values()), list(proj_ultLosses.values()) ))
+
+"""The R^2 coefficients are close to 1, which is very good. This means that both GLM and Chain-Ladder Method provide a good fit between the projected values and actual values."""
 
 
 """# Calculating Rate and Benefit Adjustment Factors
