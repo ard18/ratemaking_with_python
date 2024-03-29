@@ -230,38 +230,6 @@ for i in range(0,max_length):
     loss_df.rename(columns={i:(i+1)*12,}, inplace=True)
 st.dataframe(loss_df,width=1000)
 
-'''## Using GLMs for projecting Ultimate Losses'''
-def GLM_UltClaims(dataset):
-    '''The dataset used here is a dataframe.
-    This function outputs a dataframe having projected the lower half of the original dataset, i.e., projected losses'''
-    # dataset is a dataframe
-    warnings.filterwarnings("ignore", category=RuntimeWarning)
-    i = 0
-    k = 9
-    while i<9:
-        x_train = [ dataset.iloc[j,i] for j in range(0,k)   ]
-        y_train = [ dataset.iloc[j,i+1] for j in range(0,k) ]
-        x_test =  [ dataset.iat[j,i] for j in range(k,10)   ]
-
-        glm_model = sm.GLM(y_train,x_train,family=sm.families.Gaussian()) # using gaussian glm
-        model_results = glm_model.fit(method="bfgs")
-        y_test = model_results.predict(x_test)
-
-        for j in range(0,len(y_test)):
-            dataset.iat[k+j,i+1] = y_test[j]
-        i+=1
-        k-=1
-    return dataset
-data = GLM_UltClaims(loss_df)
-st.write("Dataframe with GLM projected losses in the lower triangle")
-data
-# GLM projected ultimate Losses
-glmUlt_Losses = {}
-for i in range(0,len(loss_triangle.keys())):
-    glmUlt_Losses[list(loss_triangle.keys())[i]] = data.iat[i,9]
-_df(glmUlt_Losses,"GLM Projected Ultimate Losses")
-
-
 
 # triangle of LDFs
 st.write("Loss Development Factors")
@@ -350,6 +318,37 @@ for i in range(0, len(cdf)):
             proj_ultLosses[ list(loss_triangle.keys())[j] ] = round( list(loss_triangle.values())[i][-1]*cdf[i],4)
 st.subheader("Projected Ultimate Losses")
 _df(proj_ultLosses,"Projected Ultimate Losses")
+
+'''## Using GLMs for projecting Ultimate Losses'''
+def GLM_UltClaims(dataset):
+    '''The dataset used here is a dataframe.
+    This function outputs a dataframe having projected the lower half of the original dataset, i.e., projected losses'''
+    # dataset is a dataframe
+    warnings.filterwarnings("ignore", category=RuntimeWarning)
+    i = 0
+    k = 9
+    while i<9:
+        x_train = [ dataset.iloc[j,i] for j in range(0,k)   ]
+        y_train = [ dataset.iloc[j,i+1] for j in range(0,k) ]
+        x_test =  [ dataset.iat[j,i] for j in range(k,10)   ]
+
+        glm_model = sm.GLM(y_train,x_train,family=sm.families.Gaussian()) # using gaussian glm
+        model_results = glm_model.fit(method="bfgs")
+        y_test = model_results.predict(x_test)
+
+        for j in range(0,len(y_test)):
+            dataset.iat[k+j,i+1] = y_test[j]
+        i+=1
+        k-=1
+    return dataset
+data = GLM_UltClaims(loss_df)
+st.write("Dataframe with GLM projected losses in the lower triangle")
+data
+# GLM projected ultimate Losses
+glmUlt_Losses = {}
+for i in range(0,len(loss_triangle.keys())):
+    glmUlt_Losses[list(loss_triangle.keys())[i]] = data.iat[i,9]
+_df(glmUlt_Losses,"GLM Projected Ultimate Losses")
 
 """## Lets evaluate the closeness of our projected ultimate losses to the actual ultimate losses."""
 
