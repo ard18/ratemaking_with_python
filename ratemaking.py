@@ -378,7 +378,12 @@ with col8:
 
 """The R^2 coefficients are close to 1, which is very good. This means that both GLM and Chain-Ladder Method provide a good fit between the projected values and actual values."""
 """### Select the losses of the method producing lower MAE"""
-ULT_LOSSES = proj_ultLosses if mae1<mae2 else glmUlt_Losses
+if mae1<mae2:
+    st.subheader("Chain-Ladder")
+    ULT_LOSSES = proj_ultLosses
+else:
+    st.subheader("GLM")
+    ULT_LOSSES = glmUlt_Losses
 _df(ULT_LOSSES,"Selected Ultimate Losses")
 
 ultLosses_dict = ({
