@@ -301,7 +301,7 @@ for i in range(1, len(selected_Ldf)+1):
         f*=selected_Ldf[j]
     cdf.append( round( f,4) )
 st.write(cdf)
-cdf_df = pd.DataFrame({'CDF':list(cdf.values())[::-1],})
+cdf_df = pd.DataFrame({'CDF':cdf[::-1],})
 cdf_df = cdf_df.T
 for i in range(0,max_length+1):
         cdf_df.rename(columns={i:"{}-{}".format((i+1)*12,'ult'),}, inplace=True)
