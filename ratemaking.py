@@ -303,7 +303,7 @@ for i in range(1, len(selected_Ldf)+1):
 st.write(cdf)
 cdf_df = pd.DataFrame({'CDF':cdf,})
 cdf_df = cdf_df.T
-i = max_length
+i = max_length+1
 while i!=0:
     cdf_df.rename(columns={i:"{}-{}".format((i)*12,'ult'),}, inplace=True)
     i-=1
