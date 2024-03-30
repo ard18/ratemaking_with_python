@@ -301,14 +301,10 @@ for i in range(1, len(selected_Ldf)+1):
         f*=selected_Ldf[j]
     cdf.append( round( f,4) )
 st.write(cdf)
-cdf_df = pd.DataFrame({'CDF':cdf,})
+cdf_df = pd.DataFrame({'CDF':list(cdf.values())[::-1],})
 cdf_df = cdf_df.T
-i = max_length+1
-while i!=0:
-    cdf_df.rename(columns={i:"{}-{}".format((i)*12,'ult'),}, inplace=True)
-    i-=1
-# for i in range(0,max_length+1):
-#         cdf_df.rename(columns={i:"{}-{}".format((i+1)*12,'ult'),}, inplace=True)
+for i in range(0,max_length+1):
+        cdf_df.rename(columns={i:"{}-{}".format((i+1)*12,'ult'),}, inplace=True)
 st.subheader("Cumulative Development Factors")
 st.dataframe(cdf_df)
 
