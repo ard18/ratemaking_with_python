@@ -945,10 +945,17 @@ st.write("Permissible Loss Ratio = ", round(permissibleLR*100,3),"%")
 
 """# Overall Indicated Rate Change"""
 
-# find the loss and alae ratios
+# find the loss and lae ratios
 loss_ratio = {}
 for i in inf_trendedLosses.keys():
     loss_ratio[i] = inf_trendedLosses[i]/inf_trendedPrems[i]
+
+# display the loss and lae ratios
+loss_ratio_disp = {}
+for i in loss_ratio.keys():
+    loss_ratio_disp[i] = round(loss_ratio[i]*100, 3)
+_df(loss_ratio_disp, "Loss(plus LAE) Ratio (in %)")
+
 avg_loss_ratio = 0
 for i in loss_ratio.keys():
     avg_loss_ratio+=loss_ratio[i]
