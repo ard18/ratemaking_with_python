@@ -300,7 +300,6 @@ for i in range(1, len(selected_Ldf)+1):
     for j in range(0, i):
         f*=selected_Ldf[j]
     cdf.append( round( f,4) )
-st.write(cdf)
 cdf_df = pd.DataFrame({'CDF':cdf[::-1],})
 cdf_df = cdf_df.T
 for i in range(0,max_length+1):
