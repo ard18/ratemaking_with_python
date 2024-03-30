@@ -381,13 +381,13 @@ with col8:
 losses_selected = ""
 if mae1<mae2:
     st.subheader("Chain-Ladder")
-    losses_selected = "Chain-Ladder"
+    losses_selected = "Chain-Ladder Projected Ultimate Losses"
     ULT_LOSSES = proj_ultLosses
 else:
     st.subheader("GLM")
-    losses_selected = "GLM"
+    losses_selected = "GLM Projected Ultimate Losses"
     ULT_LOSSES = glmUlt_Losses
-_df(ULT_LOSSES,losses_selected)
+_df(ULT_LOSSES,losses_selected )
 
 ultLosses_dict = ({
     "Chain-Ladder":proj_ultLosses.values(),
