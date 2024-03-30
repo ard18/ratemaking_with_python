@@ -376,7 +376,7 @@ with col8:
     st.write("Mean Absolute Error based on Chain-Ladder values =", round( mae1,3))
     st.write("R^2 coefficient based on Chain-Ladder values =", round( r2(list(act_ultLosses.values()), list(proj_ultLosses.values()) ),3))
 
-"""The R^2 coefficients are close to 1, which is very good. This means that both GLM and Chain-Ladder Method provide a good fit between the projected values and actual values."""
+#"""The R^2 coefficients are close to 1, which is very good. This means that both GLM and Chain-Ladder Method provide a good fit between the projected values and actual values."""
 """### Select the losses of the method producing lower MAE"""
 losses_selected = ""
 if mae1<mae2:
