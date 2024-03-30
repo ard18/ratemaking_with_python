@@ -313,8 +313,8 @@ for i in range(0, len(cdf)):
     for j in range(0, len(loss_triangle)):
         if(i==j):
             proj_ultLosses[ list(loss_triangle.keys())[j] ] = round( list(loss_triangle.values())[i][-1]*cdf[i],4)
-st.subheader("Projected Ultimate Losses")
-_df(proj_ultLosses,"Projected Ultimate Losses")
+st.subheader("Chain-Ladder Projected Ultimate Losses")
+_df(proj_ultLosses,"Chain-Ladder Projected Ultimate Losses")
 
 '''## Using GLMs for projecting Ultimate Losses'''
 def GLM_UltClaims(dataset):
@@ -360,7 +360,7 @@ for i in range(1988,1998):
 col5, col6, col7 = st.columns(3)
 col5.subheader("Actual Ultimate Losses")
 col5.dataframe(act_ultLosses, width=300)
-col6.subheader("Projected Ultimate Losses")
+col6.subheader("Chain-Ladder Projected Ultimate Losses")
 col6.dataframe(proj_ultLosses, width=300)
 col7.subheader("GLM Projected Ultimate Losses")
 col7.dataframe(glmUlt_Losses, width=300)
