@@ -401,7 +401,7 @@ for key, values in ultLosses_dict.items():
     fig2.add_trace(go.Scatter(x=list(range(1988, 1988*(len(values) + 1))), y=list(values), mode='lines', name=key))
 # Customize layout
 fig2.update_layout(title='Ultimate Losses',
-                  xaxis_title='Data Points', yaxis_title='Values')
+                  xaxis_title='Accident Years', yaxis_title='Losses')
 # Display the chart
 st.plotly_chart(fig2)
 
