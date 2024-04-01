@@ -425,6 +425,8 @@ for i in range(1988,1998):
 st.subheader("Earned Premium (Net)")
 _df(net_prem_earned,"Earned Premium Net")
 
+col10,col11,col12 = st.columns(3)
+
 """Assume some rate changes (Other rate changes can be assumed)."""
 
 # Assume rate changes (for now, values are taken similar to those in Massachusetts Rate Filings)
@@ -439,14 +441,14 @@ rate_changes_df = pd.DataFrame({
     "rate change dates":rate_changes.keys(),
     "rate changes ":rate_changes.values()
 })
-st.dataframe(rate_changes_df, hide_index=True)
+col10.dataframe(rate_changes_df, hide_index=True)
 # first calculate the rate change indeces
 rates = list(rate_changes.values())
 rate_index =[1.00]+[ (1+i) for i in rates ] # including initial index of segment without changes = 1.00 (rate change = 0%)
 rate_index_df = pd.DataFrame({
     'rate index':rate_index
 })
-st.dataframe(rate_index_df,hide_index=True)
+col11.dataframe(rate_index_df,hide_index=True)
 
 cum_index = []
 f = 1
@@ -456,7 +458,7 @@ for i in rate_index:
 cum_index_df = pd.DataFrame({
     'cumulative rate index':cum_index
 })
-st.dataframe(cum_index_df,hide_index=True)
+col12.dataframe(cum_index_df,hide_index=True)
 
 current_cum_rate_index = cum_index[-1]
 st.write("Current Cumulative Rate Level Index =",current_cum_rate_index)
@@ -578,6 +580,7 @@ avg_CumulIndices_df = pd.DataFrame({
 st.subheader("Average Cumulative Rate level Indices for the respective accident years")
 st.dataframe(avg_CumulIndices_df, hide_index=True)
 
+col13, col14 = st.columns(2)
 # On-Level Factors for the premiums
 onlevel = {}
 for i in avg_CumulIndices.keys():
@@ -586,8 +589,8 @@ onlevel_df = pd.DataFrame({
     "Accident Year": onlevel.keys(),
     "On-Level Factors":onlevel.values() 
 })
-st.subheader("On-Level Factors for the premiums")
-st.dataframe(onlevel_df, hide_index=True)
+col13.subheader("On-Level Factors for the premiums")
+col13.dataframe(onlevel_df, hide_index=True)
 
 # On-Levelling the Premiums
 AdjustedPrem = {}
@@ -597,8 +600,8 @@ AdjustedPrem_df = pd.DataFrame({
     "Accident Year": AdjustedPrem.keys(),
     "Rate Level Adjusted Premiums(Net)":AdjustedPrem.values() 
 })
-st.subheader("Premiums adjusted for rate level changes:")
-st.dataframe(AdjustedPrem_df, hide_index=True)
+col14.subheader("Premiums adjusted for rate level changes:")
+col14.dataframe(AdjustedPrem_df, hide_index=True)
 
 
 
