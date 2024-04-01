@@ -427,7 +427,7 @@ _df(net_prem_earned,"Earned Premium Net")
 
 col10,col11,col12 = st.columns(3)
 
-"""Assume some rate changes (Other rate changes can be assumed)."""
+col10.markdown("""Assume some rate changes (Other rate changes can be assumed).""")
 
 # Assume rate changes (for now, values are taken similar to those in Massachusetts Rate Filings)
 rate_changes = {
