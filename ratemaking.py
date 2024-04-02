@@ -14,9 +14,9 @@ pd.set_option("display.max_columns",None)
 
 st.set_page_config(
     page_title="Ratemaking",
-    page_icon="✌️"
+    page_icon="✌️",
+    layout="wide"
 )
-st.sidebar.success("Select a method from below:")
 # display various dataframes
 def _df(ds, val_col):
     ds_df = pd.DataFrame({
@@ -26,8 +26,7 @@ def _df(ds, val_col):
     st.dataframe(ds_df, hide_index=True)
 
 # home page configs 
-st.set_page_config(layout="wide")
-st.title("Worker's Compensation")
+st.title("Worker's Compensation 🏢👨🏻‍💼")
 st.subheader("Pricing(Ratemaking) Worker's Compensation Premiums using Actuarial Techniques")
 
 # our csv file
