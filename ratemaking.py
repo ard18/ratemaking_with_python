@@ -968,9 +968,9 @@ avg_loss_ratio/=len(loss_ratio.keys())
 st.write("Average loss ratio = ",round(avg_loss_ratio*100,2),"%")
 
 if(avg_loss_ratio <= permissibleLR):
-    st.write("Since, average loss ratio %.3f is less than permissible loss ratio %.3f,\nThe Company met underwriting profit expectations.\n"%(avg_loss_ratio,permissibleLR))
+    st.write("Since, average loss ratio %.3f\% is less than permissible loss ratio %.3f\%,\nThe Company met underwriting profit expectations.\n"%(avg_loss_ratio*100,permissibleLR*100))
 else :
-    st.write("Since, average loss ratio %.3f is greater than permissible loss ratio %.3f,\nThe Company did not meet underwriting profit expectations.\n"%(avg_loss_ratio,permissibleLR))
+    st.write("Since, average loss ratio %.3f\% is greater than permissible loss ratio %.3f\%,\nThe Company did not meet underwriting profit expectations.\n"%(avg_loss_ratio*100,permissibleLR*100))
 
 # find overall rate level indicated change
 indicated_avg_rate_change = ((avg_loss_ratio+fixed_exp_provision)/(1-variable_exp_provision-profit_provision)) - 1
