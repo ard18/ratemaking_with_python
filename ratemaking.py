@@ -30,7 +30,7 @@ st.title("Worker's Compensation 🏢👨🏻‍💼")
 st.subheader("Pricing(Ratemaking) Worker's Compensation Premiums using Actuarial Techniques")
 
 # our csv file
-filepath = "ratemaking_with_python/wkcomp_pos.csv"
+filepath = "./wkcomp_pos.csv"
 
 # load the dataset
 @st.cache_data # for faster execution
@@ -805,7 +805,7 @@ col19.dataframe(AdjustedLosses_df, hide_index=True)
 """
 
 # Lets work on Inflation Rates first
-filepath = "ratemaking_with_python/605_InflationRates.csv"
+filepath = "./605_InflationRates.csv"
 
 # load the inflation dataset
 inflation_rates = load_data(filepath)
