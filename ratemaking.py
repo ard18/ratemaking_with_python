@@ -766,6 +766,7 @@ avg_LossLvl_df = pd.DataFrame({
 st.subheader("Average Loss level Indices for the respective accident years")
 st.dataframe(avg_LossLvl_df, hide_index=True)
 
+col18, col19 = st.columns(2)
 # Adjustment Factors
 adjusts = {}
 st.write("Current Loss Level =",current_loss_lvl)
@@ -775,8 +776,8 @@ adjusts_df = pd.DataFrame({
     "Accident Year": adjusts.keys(),
     "Adjustment Factors":adjusts.values() 
 })
-st.subheader("Adjustment Factors for the losses")
-st.dataframe(adjusts_df, hide_index=True)
+col18.subheader("Adjustment Factors for the losses")
+col18.dataframe(adjusts_df, hide_index=True)
 
 # Adjusting the Losses
 AdjustedLosses = {}
@@ -786,8 +787,8 @@ AdjustedLosses_df = pd.DataFrame({
     "Accident Year": AdjustedLosses.keys(),
     "Benefit Adjusted Losses ":AdjustedLosses.values() 
 })
-st.subheader("Losses adjusted for benefit changes:")
-st.dataframe(AdjustedLosses_df, hide_index=True)
+col19.subheader("Losses adjusted for benefit changes:")
+col19.dataframe(AdjustedLosses_df, hide_index=True)
 
 
 
