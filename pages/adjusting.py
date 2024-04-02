@@ -6,7 +6,7 @@ from os.path import dirname, join
 import sys 
 sys.path.insert(0, join(dirname(__file__), '..')) 
 
-from Ratemaking import loss_data,_df,ULT_LOSSES
+#from Ratemaking import loss_data,_df,ULT_LOSSES
 
 st.set_page_config(page_title="Adjusting", page_icon="🎢", layout="wide")
 
