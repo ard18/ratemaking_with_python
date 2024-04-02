@@ -427,7 +427,7 @@ _df(net_prem_earned,"Earned Premium Net")
 
 col10,col11,col12 = st.columns(3)
 
-col10.markdown("""Assume some rate changes (Other rate changes can be assumed).""")
+col10.subheader("Assume some rate changes (Other rate changes can be assumed).")
 
 # Assume rate changes (for now, values are taken similar to those in Massachusetts Rate Filings)
 rate_changes = {
@@ -610,7 +610,8 @@ col14.dataframe(AdjustedPrem_df, hide_index=True)
 
 
 """## Adjusting Losses for Benefit Changes"""
-"""Assume some benefit changes (Other benefit changes can be assumed)."""
+col15,col16,col17 = st.columns(3)
+col15.subheader("""Assume some benefit changes (Other benefit changes can be assumed).""")
 # Assume benefit changes (Other benefit changes can be assumed)
 benefit_changes = {
             # datetime.date(1988,4,1):0.05,
@@ -627,14 +628,14 @@ benefit_changes_df = pd.DataFrame({
     "benefit change dates":benefit_changes.keys(),
     "benefit changes ":benefit_changes.values()
 })
-st.dataframe(benefit_changes_df, hide_index=True)
+col15.dataframe(benefit_changes_df, hide_index=True)
 # first calculate the benefit change indeces
 benefits = list(benefit_changes.values())
 benefit_index =[1.00]+[ (1+i) for i in benefits ] # including initial index without changes = 1.00 (rate change = 0%)
 benefit_index_df = pd.DataFrame({
     "Benefit index":benefit_index
 })
-st.dataframe(benefit_index_df, hide_index=True)
+col16.dataframe(benefit_index_df, hide_index=True)
 
 loss_lvl = []
 f = 1
@@ -644,7 +645,7 @@ for i in benefit_index:
 loss_lvl_df = pd.DataFrame({
     'loss level index':loss_lvl
 })
-st.dataframe(loss_lvl_df,hide_index=True)
+col17.dataframe(loss_lvl_df,hide_index=True)
 
 current_loss_lvl = loss_lvl[-1]
 st.write("Current Loss Level Index =",current_loss_lvl)
