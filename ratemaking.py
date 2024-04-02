@@ -889,30 +889,30 @@ _df(inf_trendedLosses,"Inflation Trended Losses")
 ##### Future policy period begins in Jan 1, 1998. Inflation rate will be in effect for 12 months. Thus our forecast period average earned date is:
 ##### Midpoint of the period 1/1/1998 to 12/31/1999 = 1/1/1999
 """
-
+col23, col24, col25 = st.columns(3)
 prem_inf_period = {}
 prem_forecast_Date = datetime.date(1999,1,1)
 for i in inf_index.keys():
     expDate = datetime.date(i,1,1)
     diff = months_between(prem_forecast_Date,expDate)
     prem_inf_period[i] = diff
-st.write("The trending periods for premiums are:")
+col23.write("The trending periods for premiums are:")
 prem_inf_period_df = pd.DataFrame({
     "periods":periods,
     "trending periods":prem_inf_period.values()
 })
-st.dataframe(prem_inf_period_df,hide_index=True)
+col23.dataframe(prem_inf_period_df,hide_index=True)
 
 # trend factors for premiums
 prem_inf_factor = {}
 for i in prem_inf_period.keys():
     prem_inf_factor[i] = (1 + (0.01*inf_avg[i]))**prem_inf_period[i]
-st.write("The trend factors for premiums are:")
+col24.write("The trend factors for premiums are:")
 prem_inf_factor_df = pd.DataFrame({
     "periods":periods,
     "trend factors":prem_inf_factor.values()
 })
-st.dataframe(prem_inf_factor_df,hide_index=True)
+col24.dataframe(prem_inf_factor_df,hide_index=True)
 
 # Now we trend the premiums
 inf_trendedPrems = {}
