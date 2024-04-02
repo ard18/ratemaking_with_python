@@ -12,6 +12,11 @@ import statsmodels.api as sm
 import warnings
 pd.set_option("display.max_columns",None)
 
+st.set_page_config(
+    page_title="Ratemaking",
+    page_icon="✌️"
+)
+st.sidebar.success("Select a method from below:")
 # display various dataframes
 def _df(ds, val_col):
     ds_df = pd.DataFrame({
@@ -26,7 +31,7 @@ st.title("Worker's Compensation")
 st.subheader("Pricing(Ratemaking) Worker's Compensation Premiums using Actuarial Techniques")
 
 # our csv file
-filepath = "./wkcomp_pos.csv"
+filepath = "ratemaking_with_python/wkcomp_pos.csv"
 
 # load the dataset
 @st.cache_data # for faster execution
@@ -801,7 +806,7 @@ col19.dataframe(AdjustedLosses_df, hide_index=True)
 """
 
 # Lets work on Inflation Rates first
-filepath = "./605_InflationRates.csv"
+filepath = "ratemaking_with_python/605_InflationRates.csv"
 
 # load the inflation dataset
 inflation_rates = load_data(filepath)
