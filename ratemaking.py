@@ -30,7 +30,7 @@ st.title("Worker's Compensation 🏢👨🏻‍💼")
 st.subheader("Pricing(Ratemaking) Worker's Compensation Premiums using Actuarial Techniques")
 
 # our csv file
-filepath = "./wkcomp_pos.csv"
+filepath = "ratemaking_with_python/wkcomp_pos.csv"
 
 # load the dataset
 @st.cache_data # for faster execution
@@ -84,7 +84,7 @@ with col2:
 slt_comp = st.selectbox("Select a company by GRCODE:", grcodes, index=0, placeholder="Choose an option")
 
 
-"""# Let's see some Triangles"""
+"""# Let's see some Triangles """
 
 # python class that consists of 4 different averaging methods for averaging loss-development factors
 class AveragingMethods:
@@ -805,7 +805,7 @@ col19.dataframe(AdjustedLosses_df, hide_index=True)
 """
 
 # Lets work on Inflation Rates first
-filepath = "./605_InflationRates.csv"
+filepath = "ratemaking_with_python/605_InflationRates.csv"
 
 # load the inflation dataset
 inflation_rates = load_data(filepath)
