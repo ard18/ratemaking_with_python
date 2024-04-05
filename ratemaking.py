@@ -48,7 +48,7 @@ st.write("Features in dataset:",columns)
 # correlation heatmap
 st.subheader("Correlation heatmap")
 df_corr = dataset.drop(columns=['GRCODE','GRNAME'])
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figure=(15,15))
 sns.heatmap(df_corr.corr(), ax=ax, annot=True, linewidths=0.36, linecolor="black", fmt=".2f")
 st.write(fig)
 
