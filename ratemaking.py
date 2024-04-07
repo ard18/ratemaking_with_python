@@ -81,7 +81,7 @@ with col2:
     st.dataframe(df_comp, hide_index=True,)
 
 # select a grcode
-slt_comp = st.selectbox("Select a company by GRCODE:", grcodes, index=0, placeholder="Choose an option")
+slt_comp = st.selectbox("Select a company by its GRCODE:", grcodes, index=0, placeholder="Choose an option")
 
 
 """# Let's see some Triangles """
