@@ -77,7 +77,7 @@ df_comp = pd.DataFrame(
     }
 )
 with col2:
-    st.subheader("For this project, we use a sample of 5 companies:")
+    st.subheader("For this project, we use a sample of 5 companies: (Later we'll work on more)")
     st.dataframe(df_comp, hide_index=True,)
 
 # select a grcode
