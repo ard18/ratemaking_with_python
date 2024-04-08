@@ -37,20 +37,21 @@ filepath = "./wkcomp_pos.csv"
 def load_data(filepath):
     df = pd.DataFrame(pd.read_csv(filepath))
     return df
-'''##### - This is our dataset'''
+'''### This is our dataset'''
 dataset = load_data(filepath)
-st.dataframe(dataset) # the worker's compensation dataset
+with st.expander("Open"):
+    st.dataframe(dataset) # the worker's compensation dataset
 
 # dataset columns
 columns = dataset.columns
 st.write("Features in dataset:",columns)
 
 # correlation heatmap
-st.subheader("Correlation heatmap")
-df_corr = dataset.drop(columns=['GRCODE','GRNAME'])
-fig, ax = plt.subplots(figure=(15,15))
-sns.heatmap(df_corr.corr(), ax=ax, annot=True, linewidths=0.36, linecolor="black", fmt=".2f")
-st.write(fig)
+with st.expander("__Correlation Heatmap__"):
+    df_corr = dataset.drop(columns=['GRCODE','GRNAME'])
+    fig, ax = plt.subplots(figure=(15,15))
+    sns.heatmap(df_corr.corr(), ax=ax, annot=True, linewidths=0.36, linecolor="black", fmt=".2f")
+    st.write(fig)
 
 """We see that there's a strong positive correlation between the following features:
 - PostedReserve97_D with IncurLoss_D, CumPaidLoss_D, EarnedPremDIR_D and EarnedPremNet_D  
@@ -218,7 +219,8 @@ def computeAverageLDF(ldf_info, loss_info):
 
 # the loss data of selected company
 loss_data = LossData(slt_comp)
-st.write("Loss data of selected company:",loss_data)
+with st.expander("Data"):
+    st.write("Loss data of selected company:",loss_data)
 
 # the loss development triangle
 st.write("Loss Development Triangle")
@@ -412,571 +414,574 @@ st.plotly_chart(fig2)
 
 
 
-
-
-"""# Calculating Rate and Benefit Adjustment Factors
-We use a simple general formula derived by Richard A. Bill for automating the calculation of rate and benefit adjustment factors. This is based on the parallelogram method. More details on the formula can be found in the paper by Richard A. Bill on:
-https://www.casact.org/abstract/generalized-earned-premium-rate-adjustment-factors
-
-We exclude any fluctuations arising due to legal changes.
-## Adjusting Premiums for Rate Changes
-"""
-
-# Net Premium Earned (Earned Premium - Ceded Earned Premium(or Reinsurance costs))
-net_prem_earned = {}
-for i in range(1988,1998):
-    net_prem_earned[i] = list( loss_data[loss_data['AccidentYear']==i]['EarnedPremNet_D'] )[0]
-st.subheader("Earned Premium (Net)")
-_df(net_prem_earned,"Earned Premium Net")
-
-col10,col11,col12 = st.columns(3)
-
-col10.subheader("Assume some rate changes (Other rate changes can be assumed).")
-
-# Assume rate changes (for now, values are taken similar to those in Massachusetts Rate Filings)
-rate_changes = {
-            datetime.date(1988,4,1):0.198, #datetime.date(1989,1,1):0.1,
-                datetime.date(1990,7,1):0.262, #datetime.date(1991,4,1):-0.04,
-            datetime.date(1991,5,1):0.113,  #datetime.date(1992,3,1):0.07,
-            datetime.date(1993,8,1):0.062, #datetime.date(1994,2,1):0.08,
-            datetime.date(1996,5,1):-0.122
-                }
-rate_changes_df = pd.DataFrame({
-    "rate change dates":rate_changes.keys(),
-    "rate changes ":rate_changes.values()
-})
-col10.dataframe(rate_changes_df, hide_index=True)
-# first calculate the rate change indeces
-rates = list(rate_changes.values())
-rate_index =[1.00]+[ (1+i) for i in rates ] # including initial index of segment without changes = 1.00 (rate change = 0%)
-rate_index_df = pd.DataFrame({
-    'rate index':rate_index
-})
-col11.dataframe(rate_index_df,hide_index=True)
-
-cum_index = []
-f = 1
-for i in rate_index:
-    f *= i
-    cum_index.append( round(f, 4))
-cum_index_df = pd.DataFrame({
-    'cumulative rate index':cum_index
-})
-col12.dataframe(cum_index_df,hide_index=True)
-
-current_cum_rate_index = cum_index[-1]
-st.write("Current Cumulative Rate Level Index =",current_cum_rate_index)
-
-# To calculate the portions earned by premiums under each rate change
-T = 1; E = 1;
-
-def months_between(date1,date2):
-    '''This function calculates the difference between 2 given dates in months
-    date1, date2 are in datetime.date() format'''
-    m1=date1.year*12+date1.month
-    m2=date2.year*12+date2.month
-    months=m1-m2    # difference between the dates
-
-    return months/12
-
-
-
-def find_remains(rate_dates, earned_prem_year, L):
-    '''This function calculates the remaining portions of earned premium under the rate changes
-       rate_dates is a dictionary containing the dates of rate changes, earned_prem_year is the year whose premiums are being adjusted, L is a list'''
-    if L!=[]:
-        L.append(0) # appending 0 as a means for calculating the last portion
-        to_return = []  # the list that contains the portions
-        max = 1 # maximum value (total area of an year of earned premium)
-        for i in range(0, len(L)):
-            if L[i]!=0:
-                diff = max - L[i]   # calculate remaining portion
-                to_return.append(round( diff,5))
-                max = L[i]
-                if L[i+1]==0:   # for the last portion to be appended
-                    to_return.append(round( max,5))
-            else:
-                to_return.append(0)
-
-        if to_return.count(0) == len(to_return):
-            to_return = earnedPortion_ForUnaffectedYear(rate_dates, earned_prem_year, to_return)
-
-        to_return.pop()
-        return to_return
-
-
-
-def earnedPortion_ForUnaffectedYear(rate_dates, earned_prem_year, L):
-    '''This function sets the portion earned by premium for that year as 1 if there are no rate changes affecting that year
-    rate_dates is a dictionary containing the dates of rate changes, earned_prem_year is the year whose premiums are being adjusted, L is a list'''
-    c = 0
-    start_date = datetime.date(earned_prem_year,1,1)
-    for i in rate_dates:
-        if( months_between(i, start_date)>0 ):      # checking where to insert 1
-            break
-        else:
-            c+=1
-    L.insert(c,1)   # insert 1 as portion earned by premium
-    return L
-
-
-
-def earnedPortion(rate_dates, earned_prem_years):
-    '''This function calculates the portion of earned premium under given rate changes
-    rate_dates is a dictionary containing the dates of rate changes and earned_prem_years is also a dictionary containing the years in which premium is earned'''
-    portion = {}
-    for i in earned_prem_years:
-        portion[i] = []
-    for i in earned_prem_years:
-        start_date = datetime.date(i,1,1)
-        for j in rate_dates:
-
-            if months_between(j, start_date)<1 and months_between(j, start_date)>-1:
-                # algorithm for calculating portions of earned premium
-                D = months_between(j, start_date)
-
-                A = D+T
-                B = max( A-E, 0 )
-                C = max( D, 0 )
-
-                P = 1 - ( (pow(A,2)-pow(B,2)-pow(C,2)) / (2*E*T) )
-                portion[i].append( round(P, 5))
-            else:
-                portion[i].append(0)
-
-    for i in portion.keys():
-        portion[i] = find_remains(rate_dates, i, portion[i])
-    return(portion)
-
-
-rate_effec_dates = list( rate_changes.keys())
-years_toAdjust = list( net_prem_earned.keys() )
-earned_NetPremPortion = earnedPortion(rate_effec_dates, years_toAdjust)
-earned_NetPremPortion_df = pd.DataFrame({
-    "Accident Years":earned_NetPremPortion.keys(),
-    "Earned Premium (Net) Portions": earned_NetPremPortion.values()
-})
-st.subheader("The portion earned by the premium in the years w.r.t. the rate changes are:\n")
-st.dataframe(earned_NetPremPortion_df,hide_index=True)
-
-# Average Cumulative Rate Level Indices
-def AvgCumulIndices(L, cumul_indices):
-    '''This function calculates the average cumulative rate level indices for the earned premium
-    L, cumul_indices are numpy arrays where L contains the portions of earned premiums and cumul_indices contains the cumulative rate level indices'''
-    prod = L*cumul_indices
-    sum = 0
-    for i in prod:
-        sum+=i
-    return round(sum, 5)
-
-# changing to numpy arrays
-for i in earned_NetPremPortion.keys():
-    earned_NetPremPortion[i] = np.array(earned_NetPremPortion[i])
-cum_index = np.array(cum_index)
-
-avg_CumulIndices = {}
-for i in earned_NetPremPortion.keys():
-    avg_CumulIndices[i] = AvgCumulIndices(earned_NetPremPortion[i], cum_index)
-avg_CumulIndices_df = pd.DataFrame({
-    "Accident Year": avg_CumulIndices.keys(),
-    "Average Cumulative Rate Level Indices":avg_CumulIndices.values() 
-})
-st.subheader("Average Cumulative Rate level Indices for the respective accident years")
-st.dataframe(avg_CumulIndices_df, hide_index=True)
-
-col13, col14 = st.columns(2)
-# On-Level Factors for the premiums
-onlevel = {}
-for i in avg_CumulIndices.keys():
-    onlevel[i] = round( current_cum_rate_index/avg_CumulIndices[i], 5 )
-onlevel_df = pd.DataFrame({
-    "Accident Year": onlevel.keys(),
-    "On-Level Factors":onlevel.values() 
-})
-col13.subheader("On-Level Factors for the premiums")
-col13.dataframe(onlevel_df, hide_index=True)
-
-# On-Levelling the Premiums
-AdjustedPrem = {}
-for i in onlevel.keys():
-    AdjustedPrem[i] = round( net_prem_earned[i] * onlevel[i], 5)
-AdjustedPrem_df = pd.DataFrame({
-    "Accident Year": AdjustedPrem.keys(),
-    "Rate Level Adjusted Premiums(Net)":AdjustedPrem.values() 
-})
-col14.subheader("Premiums adjusted for rate level changes:")
-col14.dataframe(AdjustedPrem_df, hide_index=True)
-
-
-
-
-
-
-
-"""## Adjusting Losses for Benefit Changes"""
-col15,col16,col17 = st.columns(3)
-col15.subheader("""Assume some benefit changes (Other benefit changes can be assumed).""")
-# Assume benefit changes (Other benefit changes can be assumed)
-benefit_changes = {
-            # datetime.date(1988,4,1):0.05,
-                 datetime.date(1989,1,1):0.1,
-            # datetime.date(1990,7,1):-0.02,
-                 datetime.date(1991,4,1):-0.04,
-            # datetime.date(1991,5,1):0.11,
-                 datetime.date(1992,3,1):0.07,
-            # datetime.date(1993,8,1):-0.05,
-                 datetime.date(1994,2,1):0.08,
-            # datetime.date(1996,8,1):0.15
-                }
-benefit_changes_df = pd.DataFrame({
-    "benefit change dates":benefit_changes.keys(),
-    "benefit changes ":benefit_changes.values()
-})
-col15.dataframe(benefit_changes_df, hide_index=True)
-# first calculate the benefit change indeces
-benefits = list(benefit_changes.values())
-benefit_index =[1.00]+[ (1+i) for i in benefits ] # including initial index without changes = 1.00 (rate change = 0%)
-benefit_index_df = pd.DataFrame({
-    "Benefit index":benefit_index
-})
-col16.dataframe(benefit_index_df, hide_index=True)
-
-loss_lvl = []
-f = 1
-for i in benefit_index:
-    f *= i
-    loss_lvl.append( round(f, 4))
-loss_lvl_df = pd.DataFrame({
-    'loss level index':loss_lvl
-})
-col17.dataframe(loss_lvl_df,hide_index=True)
-
-current_loss_lvl = loss_lvl[-1]
-st.write("Current Loss Level Index =",current_loss_lvl)
-
-T = 1; E = 1;
-
-def months_between(date1,date2):
-    '''This function calculates the difference between 2 given dates in months
-    date1, date2 are in datetime.date() format'''
-    m1=date1.year*12+date1.month
-    m2=date2.year*12+date2.month
-    months=m1-m2    # difference between the dates
-
-    return months/12
-
-
-
-def find_remains(ben_dates, loss_year, L):
-    '''This function calculates the remaining portions of earned premium under the rate changes
-       ben_dates is a list containing the dates of benefit changes, loss_year is the year whose losses are being adjusted, L is a list'''
-    if L!=[]:
-        L.append(0) # appending 0 as a means for calculating the last portion
-        to_return = []  # the list that contains the portions
-        max = 1 # maximum value (total area of an year of losses)
-        for i in range(0, len(L)):
-            if L[i]!=0:
-                diff = max - L[i]   # calculate remaining portion
-                to_return.append(round( diff,5))
-                max = L[i]
-                if L[i+1]==0:   # for the last portion to be appended
-                    to_return.append(round( max,5))
-            else:
-                to_return.append(0)
-
-        if to_return.count(0) == len(to_return):
-            to_return = Portion_ForUnaffectedYear(ben_dates, loss_year, to_return)
-
-        to_return.pop()
-        return to_return
-
-
-
-def Portion_ForUnaffectedYear(ben_dates, loss_year, L):
-    '''This function sets the portion earned by premium for that year as 1 if there are no rate changes affecting that year
-    ben_dates is a list containing the dates of benefit changes, loss_year is the year whose losses are being adjusted, L is a list'''
-    c = 0
-    start_date = datetime.date(loss_year,1,1)
-    for i in ben_dates:
-        if( months_between(i, start_date)>0 ):      # checking where to insert 1
-            break
-        else:
-            c+=1
-    L.insert(c,1)   # insert 1 as portion earned by premium
-    return L
-
-
-
-def LossPortion(ben_dates, loss_years):
-    '''This function calculates the portion of earned premium under given rate changes
-    ben_dates is a list containing the dates of benefit changes and loss_years is also a list containing the years in which losses occur'''
-    portion = {}
-    for i in loss_years:
-        portion[i] = []
-    for i in loss_years:
-        start_date = datetime.date(i,1,1)
-        for j in ben_dates:
-
-            if months_between(j, start_date)<1 and months_between(j, start_date)>-1:
-                # algorithm for calculating portions of earned premium
-                D = months_between(j, start_date)
-
-                A = D+T
-                B = max( A-E, 0 )
-                C = max( D, 0 )
-
-                P = 1 - ( (pow(A,2)-pow(B,2)-pow(C,2)) / (2*E*T) )
-                portion[i].append( round(P, 5))
-            else:
-                portion[i].append(0)
-
-    for i in portion.keys():
-        portion[i] = find_remains(ben_dates, i, portion[i])
-    return(portion)
-
-
-ben_effec_dates = list( benefit_changes.keys())
-years_toAdjust = list( ULT_LOSSES.keys() )
-LossesPortion = LossPortion(ben_effec_dates, years_toAdjust)
-LossesPortion_df = pd.DataFrame({
-    "Accident Years":LossesPortion.keys(),
-    "Loss Portions": LossesPortion.values()
-})
-st.subheader("The portion of the losses in the years w.r.t. the benefit changes are:\n")
-st.dataframe(LossesPortion_df,hide_index=True)
-
-
-# Average Loss Levels
-def AvgLossLevel(L, loss_levels):
-    '''This function calculates the average Loss levels for the historical periods
-    L, loss_levels are numpy arrays where L contains the portions of losses and loss_levels contains the loss levels'''
-    prod = L*loss_levels
-    sum = 0
-    for i in prod:
-        sum+=i
-    return round(sum, 5)
-
-for i in LossesPortion.keys():
-    LossesPortion[i] = np.array(LossesPortion[i])
-loss_lvl = np.array(loss_lvl)
-
-avg_LossLvl = {}
-for i in LossesPortion.keys():
-    avg_LossLvl[i] = AvgLossLevel(LossesPortion[i], loss_lvl)
-avg_LossLvl_df = pd.DataFrame({
-    "Accident Year": avg_LossLvl.keys(),
-    "Average Loss Level Indices":avg_LossLvl.values() 
-})
-st.subheader("Average Loss level Indices for the respective accident years")
-st.dataframe(avg_LossLvl_df, hide_index=True)
-
-col18, col19 = st.columns(2)
-# Adjustment Factors
-adjusts = {}
-st.write("Current Loss Level =",current_loss_lvl)
-for i in avg_LossLvl.keys():
-    adjusts[i] = round( current_loss_lvl/avg_LossLvl[i], 5 )
-adjusts_df = pd.DataFrame({
-    "Accident Year": adjusts.keys(),
-    "Adjustment Factors":adjusts.values() 
-})
-col18.subheader("Adjustment Factors for the losses")
-col18.dataframe(adjusts_df, hide_index=True)
-
-# Adjusting the Losses
-AdjustedLosses = {}
-for i in adjusts.keys():
-    AdjustedLosses[i] = round( ULT_LOSSES[i] * adjusts[i], 5)
-AdjustedLosses_df = pd.DataFrame({
-    "Accident Year": AdjustedLosses.keys(),
-    "Benefit Adjusted Losses ":AdjustedLosses.values() 
-})
-col19.subheader("Losses adjusted for benefit changes:")
-col19.dataframe(AdjustedLosses_df, hide_index=True)
-
-
-
-
-
-
-"""# Trending Loss Ratios
-
-### We are getting data related to Annual Inflation Rates by country from World Bank's website: [data.worldbank.org](https://data.worldbank.org/indicator/FP.CPI.TOTL.ZG?locations=US&view=chart)
-"""
-
-# Lets work on Inflation Rates first
-filepath = "./605_InflationRates.csv"
-
-# load the inflation dataset
-inflation_rates = load_data(filepath)
-inflation_rates
-
-# inflation rates in USA
-inf_us = inflation_rates[inflation_rates['Country Name'] == "United States"]
-st.write("We extract the inflation rates for the USA:",inf_us)
-
-inf_index = {}
-start = 1988; end = 1997
-for i in range(start, end+1):
-    inf_index[i] = inf_us.iloc[0, i-1960+4]
-
-st.write("Inflation indeces from 1988 to 1997 in the US are:\n")
-_df(inf_index, "Inflation rate")
-
-# average inflation rates
-inf_avg = {}
-periods = []
-keys = list(inf_index.keys())
-for i in range(0,len(keys)):
-    avg=0
-    temp = str(keys[i])+"-1997"
-    for j in range(i,len(keys)):
-        avg+= inf_index[keys[j]]
-    periods.append(temp)
-    inf_avg[keys[i]] = avg/(j-i+1)
-
-st.write("The average inflation rates are:")
-inf_avg_df = pd.DataFrame({
-    "periods":periods,
-    "average inflation":inf_avg.values()
-})
-st.dataframe(inf_avg_df,hide_index=True)
-
-
-"""## Our Assumptions are:
-### --> Policies are written uniformly over time.
-### --> Premiums are earned uniformly over the policy period.
-### --> Losses occur uniformly over the policy period.
-### --> Policies have annual terms.
-
-## Trend losses for inflation.
-##### Our experience periods are the historical accident years from 1988 to 1997.
-##### We assume future policy period begins on Jan 1, 1998 and inflation rate will be in effect for 12 months. Thus our forecast period average accident date is:
-##### Midpoint of the period 1/1/1998 to 12/31/1999 = 1/1/1999
-"""
-col20, col21, col22 = st.columns(3)
-loss_inf_period = {}
-loss_forecast_Date = datetime.date(1999,1,1)
-for i in inf_index.keys():
-    expDate = datetime.date(i,7,1)
-    diff = months_between(loss_forecast_Date,expDate)
-    loss_inf_period[i] = diff
-col20.write("The trending periods for losses are:")
-loss_inf_period_df = pd.DataFrame({
-    "periods":periods,
-    "trending periods":loss_inf_period.values()
-})
-col20.dataframe(loss_inf_period_df,hide_index=True)
-
-# trend factors for losses
-loss_inf_factor = {}
-for i in loss_inf_period.keys():
-    loss_inf_factor[i] = (1 + (0.01*inf_avg[i]))**loss_inf_period[i]
-col21.write("The trend factors for losses are:")
-loss_inf_factor_df = pd.DataFrame({
-    "periods":periods,
-    "trend factors":loss_inf_factor.values()
-})
-col21.dataframe(loss_inf_factor_df,hide_index=True)
-
-# Now we trend the losses
-inf_trendedLosses = {}
-for i in loss_inf_factor.keys():
-    inf_trendedLosses[i] = AdjustedLosses[i]*loss_inf_factor[i]
-st.write("Losses trended for inflation:")
-_df(inf_trendedLosses,"Inflation Trended Losses")
-
-
-
-"""## Trend Premiums for inflation.
-##### Trend will be estimated from earned premium data. The trend period will be from the average earned date in each historical period to the average earned date at the new rate level. Because of the uniform assumption, the average earned date of a period is the midpoint of the first and last dates that premiums could be earned in that period. So, these dates will depend on the policy term length.
-##### Future policy period begins in Jan 1, 1998. Inflation rate will be in effect for 12 months. Thus our forecast period average earned date is:
-##### Midpoint of the period 1/1/1998 to 12/31/1999 = 1/1/1999
-"""
-col23, col24, col25 = st.columns(3)
-prem_inf_period = {}
-prem_forecast_Date = datetime.date(1999,1,1)
-for i in inf_index.keys():
-    expDate = datetime.date(i,1,1)
-    diff = months_between(prem_forecast_Date,expDate)
-    prem_inf_period[i] = diff
-col23.write("The trending periods for premiums are:")
-prem_inf_period_df = pd.DataFrame({
-    "periods":periods,
-    "trending periods":prem_inf_period.values()
-})
-col23.dataframe(prem_inf_period_df,hide_index=True)
-
-# trend factors for premiums
-prem_inf_factor = {}
-for i in prem_inf_period.keys():
-    prem_inf_factor[i] = (1 + (0.01*inf_avg[i]))**prem_inf_period[i]
-col24.write("The trend factors for premiums are:")
-prem_inf_factor_df = pd.DataFrame({
-    "periods":periods,
-    "trend factors":prem_inf_factor.values()
-})
-col24.dataframe(prem_inf_factor_df,hide_index=True)
-
-# Now we trend the premiums
-inf_trendedPrems = {}
-for i in prem_inf_factor.keys():
-    inf_trendedPrems[i] = AdjustedPrem[i]*prem_inf_factor[i]
-st.write("Premiums trended for inflation:")
-_df(inf_trendedPrems,"Inflation Trended Premiums")
-
-
-
-
-
-
-
-
-"""# Expenses and Profits
-
-## Assume fixed expense provision and variable expense provision. Also assume underwiting profit provision.
-"""
-
-fixed_exp_provision = 0.10       # 10%
-variable_exp_provision = 0.15    # 15%
-profit_provision = 0.015         # 1.5%
-
-st.write("Fixed Expenses provision =",fixed_exp_provision*100,"%")
-st.write("Variable Expenses provision =",variable_exp_provision*100,"%")
-st.write("Target Underwriting Profit provision =",profit_provision*100,"%")
-
-# permissible loss ratio
-permissibleLR = 1 - (variable_exp_provision+profit_provision)
-st.write("Permissible Loss Ratio = ", round(permissibleLR*100,3),"%")
-
-
-
-
-"""# Overall Indicated Rate Change"""
-
-# find the loss and lae ratios
-loss_ratio = {}
-for i in inf_trendedLosses.keys():
-    loss_ratio[i] = inf_trendedLosses[i]/inf_trendedPrems[i]
-
-# display the loss and lae ratios
-loss_ratio_disp = {}
-for i in loss_ratio.keys():
-    loss_ratio_disp[i] = round(loss_ratio[i]*100, 3)
-_df(loss_ratio_disp, "Loss(plus LAE) Ratio (in %)")
-
-avg_loss_ratio = 0
-for i in loss_ratio.keys():
-    avg_loss_ratio+=loss_ratio[i]
-avg_loss_ratio/=len(loss_ratio.keys())
-st.write("Average loss ratio = ",round(avg_loss_ratio*100,2),"%")
-
-if(avg_loss_ratio <= permissibleLR):
-    st.write("Since, average loss ratio %.3f is less than permissible loss ratio %.3f,\nThe Company met underwriting profit expectations.\n"%(avg_loss_ratio,permissibleLR))
-else :
-    st.write("Since, average loss ratio %.3f is greater than permissible loss ratio %.3f,\nThe Company did not meet underwriting profit expectations.\n"%(avg_loss_ratio,permissibleLR))
-
-# find overall rate level indicated change
-indicated_avg_rate_change = ((avg_loss_ratio+fixed_exp_provision)/(1-variable_exp_provision-profit_provision)) - 1
-st.write("Indicated average rate change for is=",round(indicated_avg_rate_change*100,4),"%")
+tab1, tab2, tab3 = st.tabs(["Rates and Benefits", "Trending", "Overall Indication"])
+with tab1:
+    with st.expander("Rates and Benefits"):
+        """# Calculating Rate and Benefit Adjustment Factors
+        We use a simple general formula derived by Richard A. Bill for automating the calculation of rate and benefit adjustment factors. This is based on the parallelogram method. More details on the formula can be found in the paper by Richard A. Bill on:
+        https://www.casact.org/abstract/generalized-earned-premium-rate-adjustment-factors
+
+        We exclude any fluctuations arising due to legal changes.
+        ## Adjusting Premiums for Rate Changes
+        """
+
+        # Net Premium Earned (Earned Premium - Ceded Earned Premium(or Reinsurance costs))
+        net_prem_earned = {}
+        for i in range(1988,1998):
+            net_prem_earned[i] = list( loss_data[loss_data['AccidentYear']==i]['EarnedPremNet_D'] )[0]
+        st.subheader("Earned Premium (Net)")
+        _df(net_prem_earned,"Earned Premium Net")
+
+        col10,col11,col12 = st.columns(3)
+
+        col10.subheader("Assume some rate changes (Other rate changes can be assumed).")
+
+        # Assume rate changes (for now, values are taken similar to those in Massachusetts Rate Filings)
+        rate_changes = {
+                    datetime.date(1988,4,1):0.198, #datetime.date(1989,1,1):0.1,
+                        datetime.date(1990,7,1):0.262, #datetime.date(1991,4,1):-0.04,
+                    datetime.date(1991,5,1):0.113,  #datetime.date(1992,3,1):0.07,
+                    datetime.date(1993,8,1):0.062, #datetime.date(1994,2,1):0.08,
+                    datetime.date(1996,5,1):-0.122
+                        }
+        rate_changes_df = pd.DataFrame({
+            "rate change dates":rate_changes.keys(),
+            "rate changes ":rate_changes.values()
+        })
+        col10.dataframe(rate_changes_df, hide_index=True)
+        # first calculate the rate change indeces
+        rates = list(rate_changes.values())
+        rate_index =[1.00]+[ (1+i) for i in rates ] # including initial index of segment without changes = 1.00 (rate change = 0%)
+        rate_index_df = pd.DataFrame({
+            'rate index':rate_index
+        })
+        col11.dataframe(rate_index_df,hide_index=True)
+
+        cum_index = []
+        f = 1
+        for i in rate_index:
+            f *= i
+            cum_index.append( round(f, 4))
+        cum_index_df = pd.DataFrame({
+            'cumulative rate index':cum_index
+        })
+        col12.dataframe(cum_index_df,hide_index=True)
+
+        current_cum_rate_index = cum_index[-1]
+        st.write("Current Cumulative Rate Level Index =",current_cum_rate_index)
+
+        # To calculate the portions earned by premiums under each rate change
+        T = 1; E = 1;
+
+        def months_between(date1,date2):
+            '''This function calculates the difference between 2 given dates in months
+            date1, date2 are in datetime.date() format'''
+            m1=date1.year*12+date1.month
+            m2=date2.year*12+date2.month
+            months=m1-m2    # difference between the dates
+
+            return months/12
+
+
+
+        def find_remains(rate_dates, earned_prem_year, L):
+            '''This function calculates the remaining portions of earned premium under the rate changes
+            rate_dates is a dictionary containing the dates of rate changes, earned_prem_year is the year whose premiums are being adjusted, L is a list'''
+            if L!=[]:
+                L.append(0) # appending 0 as a means for calculating the last portion
+                to_return = []  # the list that contains the portions
+                max = 1 # maximum value (total area of an year of earned premium)
+                for i in range(0, len(L)):
+                    if L[i]!=0:
+                        diff = max - L[i]   # calculate remaining portion
+                        to_return.append(round( diff,5))
+                        max = L[i]
+                        if L[i+1]==0:   # for the last portion to be appended
+                            to_return.append(round( max,5))
+                    else:
+                        to_return.append(0)
+
+                if to_return.count(0) == len(to_return):
+                    to_return = earnedPortion_ForUnaffectedYear(rate_dates, earned_prem_year, to_return)
+
+                to_return.pop()
+                return to_return
+
+
+
+        def earnedPortion_ForUnaffectedYear(rate_dates, earned_prem_year, L):
+            '''This function sets the portion earned by premium for that year as 1 if there are no rate changes affecting that year
+            rate_dates is a dictionary containing the dates of rate changes, earned_prem_year is the year whose premiums are being adjusted, L is a list'''
+            c = 0
+            start_date = datetime.date(earned_prem_year,1,1)
+            for i in rate_dates:
+                if( months_between(i, start_date)>0 ):      # checking where to insert 1
+                    break
+                else:
+                    c+=1
+            L.insert(c,1)   # insert 1 as portion earned by premium
+            return L
+
+
+
+        def earnedPortion(rate_dates, earned_prem_years):
+            '''This function calculates the portion of earned premium under given rate changes
+            rate_dates is a dictionary containing the dates of rate changes and earned_prem_years is also a dictionary containing the years in which premium is earned'''
+            portion = {}
+            for i in earned_prem_years:
+                portion[i] = []
+            for i in earned_prem_years:
+                start_date = datetime.date(i,1,1)
+                for j in rate_dates:
+
+                    if months_between(j, start_date)<1 and months_between(j, start_date)>-1:
+                        # algorithm for calculating portions of earned premium
+                        D = months_between(j, start_date)
+
+                        A = D+T
+                        B = max( A-E, 0 )
+                        C = max( D, 0 )
+
+                        P = 1 - ( (pow(A,2)-pow(B,2)-pow(C,2)) / (2*E*T) )
+                        portion[i].append( round(P, 5))
+                    else:
+                        portion[i].append(0)
+
+            for i in portion.keys():
+                portion[i] = find_remains(rate_dates, i, portion[i])
+            return(portion)
+
+
+        rate_effec_dates = list( rate_changes.keys())
+        years_toAdjust = list( net_prem_earned.keys() )
+        earned_NetPremPortion = earnedPortion(rate_effec_dates, years_toAdjust)
+        earned_NetPremPortion_df = pd.DataFrame({
+            "Accident Years":earned_NetPremPortion.keys(),
+            "Earned Premium (Net) Portions": earned_NetPremPortion.values()
+        })
+        st.subheader("The portion earned by the premium in the years w.r.t. the rate changes are:\n")
+        st.dataframe(earned_NetPremPortion_df,hide_index=True)
+
+        # Average Cumulative Rate Level Indices
+        def AvgCumulIndices(L, cumul_indices):
+            '''This function calculates the average cumulative rate level indices for the earned premium
+            L, cumul_indices are numpy arrays where L contains the portions of earned premiums and cumul_indices contains the cumulative rate level indices'''
+            prod = L*cumul_indices
+            sum = 0
+            for i in prod:
+                sum+=i
+            return round(sum, 5)
+
+        # changing to numpy arrays
+        for i in earned_NetPremPortion.keys():
+            earned_NetPremPortion[i] = np.array(earned_NetPremPortion[i])
+        cum_index = np.array(cum_index)
+
+        avg_CumulIndices = {}
+        for i in earned_NetPremPortion.keys():
+            avg_CumulIndices[i] = AvgCumulIndices(earned_NetPremPortion[i], cum_index)
+        avg_CumulIndices_df = pd.DataFrame({
+            "Accident Year": avg_CumulIndices.keys(),
+            "Average Cumulative Rate Level Indices":avg_CumulIndices.values() 
+        })
+        st.subheader("Average Cumulative Rate level Indices for the respective accident years")
+        st.dataframe(avg_CumulIndices_df, hide_index=True)
+
+        col13, col14 = st.columns(2)
+        # On-Level Factors for the premiums
+        onlevel = {}
+        for i in avg_CumulIndices.keys():
+            onlevel[i] = round( current_cum_rate_index/avg_CumulIndices[i], 5 )
+        onlevel_df = pd.DataFrame({
+            "Accident Year": onlevel.keys(),
+            "On-Level Factors":onlevel.values() 
+        })
+        col13.subheader("On-Level Factors for the premiums")
+        col13.dataframe(onlevel_df, hide_index=True)
+
+        # On-Levelling the Premiums
+        AdjustedPrem = {}
+        for i in onlevel.keys():
+            AdjustedPrem[i] = round( net_prem_earned[i] * onlevel[i], 5)
+        AdjustedPrem_df = pd.DataFrame({
+            "Accident Year": AdjustedPrem.keys(),
+            "Rate Level Adjusted Premiums(Net)":AdjustedPrem.values() 
+        })
+        col14.subheader("Premiums adjusted for rate level changes:")
+        col14.dataframe(AdjustedPrem_df, hide_index=True)
+
+
+
+
+
+
+
+        """## Adjusting Losses for Benefit Changes"""
+        col15,col16,col17 = st.columns(3)
+        col15.subheader("""Assume some benefit changes (Other benefit changes can be assumed).""")
+        # Assume benefit changes (Other benefit changes can be assumed)
+        benefit_changes = {
+                    # datetime.date(1988,4,1):0.05,
+                        datetime.date(1989,1,1):0.1,
+                    # datetime.date(1990,7,1):-0.02,
+                        datetime.date(1991,4,1):-0.04,
+                    # datetime.date(1991,5,1):0.11,
+                        datetime.date(1992,3,1):0.07,
+                    # datetime.date(1993,8,1):-0.05,
+                        datetime.date(1994,2,1):0.08,
+                    # datetime.date(1996,8,1):0.15
+                        }
+        benefit_changes_df = pd.DataFrame({
+            "benefit change dates":benefit_changes.keys(),
+            "benefit changes ":benefit_changes.values()
+        })
+        col15.dataframe(benefit_changes_df, hide_index=True)
+        # first calculate the benefit change indeces
+        benefits = list(benefit_changes.values())
+        benefit_index =[1.00]+[ (1+i) for i in benefits ] # including initial index without changes = 1.00 (rate change = 0%)
+        benefit_index_df = pd.DataFrame({
+            "Benefit index":benefit_index
+        })
+        col16.dataframe(benefit_index_df, hide_index=True)
+
+        loss_lvl = []
+        f = 1
+        for i in benefit_index:
+            f *= i
+            loss_lvl.append( round(f, 4))
+        loss_lvl_df = pd.DataFrame({
+            'loss level index':loss_lvl
+        })
+        col17.dataframe(loss_lvl_df,hide_index=True)
+
+        current_loss_lvl = loss_lvl[-1]
+        st.write("Current Loss Level Index =",current_loss_lvl)
+
+        T = 1; E = 1;
+
+        def months_between(date1,date2):
+            '''This function calculates the difference between 2 given dates in months
+            date1, date2 are in datetime.date() format'''
+            m1=date1.year*12+date1.month
+            m2=date2.year*12+date2.month
+            months=m1-m2    # difference between the dates
+
+            return months/12
+
+
+
+        def find_remains(ben_dates, loss_year, L):
+            '''This function calculates the remaining portions of earned premium under the rate changes
+            ben_dates is a list containing the dates of benefit changes, loss_year is the year whose losses are being adjusted, L is a list'''
+            if L!=[]:
+                L.append(0) # appending 0 as a means for calculating the last portion
+                to_return = []  # the list that contains the portions
+                max = 1 # maximum value (total area of an year of losses)
+                for i in range(0, len(L)):
+                    if L[i]!=0:
+                        diff = max - L[i]   # calculate remaining portion
+                        to_return.append(round( diff,5))
+                        max = L[i]
+                        if L[i+1]==0:   # for the last portion to be appended
+                            to_return.append(round( max,5))
+                    else:
+                        to_return.append(0)
+
+                if to_return.count(0) == len(to_return):
+                    to_return = Portion_ForUnaffectedYear(ben_dates, loss_year, to_return)
+
+                to_return.pop()
+                return to_return
+
+
+
+        def Portion_ForUnaffectedYear(ben_dates, loss_year, L):
+            '''This function sets the portion earned by premium for that year as 1 if there are no rate changes affecting that year
+            ben_dates is a list containing the dates of benefit changes, loss_year is the year whose losses are being adjusted, L is a list'''
+            c = 0
+            start_date = datetime.date(loss_year,1,1)
+            for i in ben_dates:
+                if( months_between(i, start_date)>0 ):      # checking where to insert 1
+                    break
+                else:
+                    c+=1
+            L.insert(c,1)   # insert 1 as portion earned by premium
+            return L
+
+
+
+        def LossPortion(ben_dates, loss_years):
+            '''This function calculates the portion of earned premium under given rate changes
+            ben_dates is a list containing the dates of benefit changes and loss_years is also a list containing the years in which losses occur'''
+            portion = {}
+            for i in loss_years:
+                portion[i] = []
+            for i in loss_years:
+                start_date = datetime.date(i,1,1)
+                for j in ben_dates:
+
+                    if months_between(j, start_date)<1 and months_between(j, start_date)>-1:
+                        # algorithm for calculating portions of earned premium
+                        D = months_between(j, start_date)
+
+                        A = D+T
+                        B = max( A-E, 0 )
+                        C = max( D, 0 )
+
+                        P = 1 - ( (pow(A,2)-pow(B,2)-pow(C,2)) / (2*E*T) )
+                        portion[i].append( round(P, 5))
+                    else:
+                        portion[i].append(0)
+
+            for i in portion.keys():
+                portion[i] = find_remains(ben_dates, i, portion[i])
+            return(portion)
+
+
+        ben_effec_dates = list( benefit_changes.keys())
+        years_toAdjust = list( ULT_LOSSES.keys() )
+        LossesPortion = LossPortion(ben_effec_dates, years_toAdjust)
+        LossesPortion_df = pd.DataFrame({
+            "Accident Years":LossesPortion.keys(),
+            "Loss Portions": LossesPortion.values()
+        })
+        st.subheader("The portion of the losses in the years w.r.t. the benefit changes are:\n")
+        st.dataframe(LossesPortion_df,hide_index=True)
+
+
+        # Average Loss Levels
+        def AvgLossLevel(L, loss_levels):
+            '''This function calculates the average Loss levels for the historical periods
+            L, loss_levels are numpy arrays where L contains the portions of losses and loss_levels contains the loss levels'''
+            prod = L*loss_levels
+            sum = 0
+            for i in prod:
+                sum+=i
+            return round(sum, 5)
+
+        for i in LossesPortion.keys():
+            LossesPortion[i] = np.array(LossesPortion[i])
+        loss_lvl = np.array(loss_lvl)
+
+        avg_LossLvl = {}
+        for i in LossesPortion.keys():
+            avg_LossLvl[i] = AvgLossLevel(LossesPortion[i], loss_lvl)
+        avg_LossLvl_df = pd.DataFrame({
+            "Accident Year": avg_LossLvl.keys(),
+            "Average Loss Level Indices":avg_LossLvl.values() 
+        })
+        st.subheader("Average Loss level Indices for the respective accident years")
+        st.dataframe(avg_LossLvl_df, hide_index=True)
+
+        col18, col19 = st.columns(2)
+        # Adjustment Factors
+        adjusts = {}
+        st.write("Current Loss Level =",current_loss_lvl)
+        for i in avg_LossLvl.keys():
+            adjusts[i] = round( current_loss_lvl/avg_LossLvl[i], 5 )
+        adjusts_df = pd.DataFrame({
+            "Accident Year": adjusts.keys(),
+            "Adjustment Factors":adjusts.values() 
+        })
+        col18.subheader("Adjustment Factors for the losses")
+        col18.dataframe(adjusts_df, hide_index=True)
+
+        # Adjusting the Losses
+        AdjustedLosses = {}
+        for i in adjusts.keys():
+            AdjustedLosses[i] = round( ULT_LOSSES[i] * adjusts[i], 5)
+        AdjustedLosses_df = pd.DataFrame({
+            "Accident Year": AdjustedLosses.keys(),
+            "Benefit Adjusted Losses ":AdjustedLosses.values() 
+        })
+        col19.subheader("Losses adjusted for benefit changes:")
+        col19.dataframe(AdjustedLosses_df, hide_index=True)
+
+
+
+
+
+
+with tab2:
+    with st.expander("Trending"):
+        """# Trending Loss Ratios
+        """
+        """## We are getting data related to Annual Inflation Rates by country from World Bank's website: [data.worldbank.org](https://data.worldbank.org/indicator/FP.CPI.TOTL.ZG?locations=US&view=chart)
+        """
+
+        # Lets work on Inflation Rates first
+        filepath = "./605_InflationRates.csv"
+
+        # load the inflation dataset
+        inflation_rates = load_data(filepath)
+        inflation_rates
+
+        # inflation rates in USA
+        inf_us = inflation_rates[inflation_rates['Country Name'] == "United States"]
+        st.write("We extract the inflation rates for the USA:",inf_us)
+
+        inf_index = {}
+        start = 1988; end = 1997
+        for i in range(start, end+1):
+            inf_index[i] = inf_us.iloc[0, i-1960+4]
+
+        st.write("Inflation indeces from 1988 to 1997 in the US are:\n")
+        _df(inf_index, "Inflation rate")
+
+        # average inflation rates
+        inf_avg = {}
+        periods = []
+        keys = list(inf_index.keys())
+        for i in range(0,len(keys)):
+            avg=0
+            temp = str(keys[i])+"-1997"
+            for j in range(i,len(keys)):
+                avg+= inf_index[keys[j]]
+            periods.append(temp)
+            inf_avg[keys[i]] = avg/(j-i+1)
+
+        st.write("The average inflation rates are:")
+        inf_avg_df = pd.DataFrame({
+            "periods":periods,
+            "average inflation":inf_avg.values()
+        })
+        st.dataframe(inf_avg_df,hide_index=True)
+
+
+        """## Our Assumptions are:
+        ### --> Policies are written uniformly over time.
+        ### --> Premiums are earned uniformly over the policy period.
+        ### --> Losses occur uniformly over the policy period.
+        ### --> Policies have annual terms.
+
+        ## Trend losses for inflation.
+        ##### Our experience periods are the historical accident years from 1988 to 1997.
+        ##### We assume future policy period begins on Jan 1, 1998 and inflation rate will be in effect for 12 months. Thus our forecast period average accident date is:
+        ##### Midpoint of the period 1/1/1998 to 12/31/1999 = 1/1/1999
+        """
+        col20, col21, col22 = st.columns(3)
+        loss_inf_period = {}
+        loss_forecast_Date = datetime.date(1999,1,1)
+        for i in inf_index.keys():
+            expDate = datetime.date(i,7,1)
+            diff = months_between(loss_forecast_Date,expDate)
+            loss_inf_period[i] = diff
+        col20.write("The trending periods for losses are:")
+        loss_inf_period_df = pd.DataFrame({
+            "periods":periods,
+            "trending periods":loss_inf_period.values()
+        })
+        col20.dataframe(loss_inf_period_df,hide_index=True)
+
+        # trend factors for losses
+        loss_inf_factor = {}
+        for i in loss_inf_period.keys():
+            loss_inf_factor[i] = (1 + (0.01*inf_avg[i]))**loss_inf_period[i]
+        col21.write("The trend factors for losses are:")
+        loss_inf_factor_df = pd.DataFrame({
+            "periods":periods,
+            "trend factors":loss_inf_factor.values()
+        })
+        col21.dataframe(loss_inf_factor_df,hide_index=True)
+
+        # Now we trend the losses
+        inf_trendedLosses = {}
+        for i in loss_inf_factor.keys():
+            inf_trendedLosses[i] = AdjustedLosses[i]*loss_inf_factor[i]
+        st.write("Losses trended for inflation:")
+        _df(inf_trendedLosses,"Inflation Trended Losses")
+
+
+
+        """## Trend Premiums for inflation.
+        ##### Trend will be estimated from earned premium data. The trend period will be from the average earned date in each historical period to the average earned date at the new rate level. Because of the uniform assumption, the average earned date of a period is the midpoint of the first and last dates that premiums could be earned in that period. So, these dates will depend on the policy term length.
+        ##### Future policy period begins in Jan 1, 1998. Inflation rate will be in effect for 12 months. Thus our forecast period average earned date is:
+        ##### Midpoint of the period 1/1/1998 to 12/31/1999 = 1/1/1999
+        """
+        col23, col24, col25 = st.columns(3)
+        prem_inf_period = {}
+        prem_forecast_Date = datetime.date(1999,1,1)
+        for i in inf_index.keys():
+            expDate = datetime.date(i,1,1)
+            diff = months_between(prem_forecast_Date,expDate)
+            prem_inf_period[i] = diff
+        col23.write("The trending periods for premiums are:")
+        prem_inf_period_df = pd.DataFrame({
+            "periods":periods,
+            "trending periods":prem_inf_period.values()
+        })
+        col23.dataframe(prem_inf_period_df,hide_index=True)
+
+        # trend factors for premiums
+        prem_inf_factor = {}
+        for i in prem_inf_period.keys():
+            prem_inf_factor[i] = (1 + (0.01*inf_avg[i]))**prem_inf_period[i]
+        col24.write("The trend factors for premiums are:")
+        prem_inf_factor_df = pd.DataFrame({
+            "periods":periods,
+            "trend factors":prem_inf_factor.values()
+        })
+        col24.dataframe(prem_inf_factor_df,hide_index=True)
+
+        # Now we trend the premiums
+        inf_trendedPrems = {}
+        for i in prem_inf_factor.keys():
+            inf_trendedPrems[i] = AdjustedPrem[i]*prem_inf_factor[i]
+        st.write("Premiums trended for inflation:")
+        _df(inf_trendedPrems,"Inflation Trended Premiums")
+
+
+
+
+
+
+with tab3:
+    with st.expander("Overall Indication"):
+        """# Expenses and Profits
+
+        ## Assume fixed expense provision and variable expense provision. Also assume underwiting profit provision.
+        """
+
+        fixed_exp_provision = 0.10       # 10%
+        variable_exp_provision = 0.15    # 15%
+        profit_provision = 0.015         # 1.5%
+
+        st.write("Fixed Expenses provision =",fixed_exp_provision*100,"%")
+        st.write("Variable Expenses provision =",variable_exp_provision*100,"%")
+        st.write("Target Underwriting Profit provision =",profit_provision*100,"%")
+
+        # permissible loss ratio
+        permissibleLR = 1 - (variable_exp_provision+profit_provision)
+        st.write("Permissible Loss Ratio = ", round(permissibleLR*100,3),"%")
+
+
+
+
+        """# Overall Indicated Rate Change"""
+
+        # find the loss and lae ratios
+        loss_ratio = {}
+        for i in inf_trendedLosses.keys():
+            loss_ratio[i] = inf_trendedLosses[i]/inf_trendedPrems[i]
+
+        # display the loss and lae ratios
+        loss_ratio_disp = {}
+        for i in loss_ratio.keys():
+            loss_ratio_disp[i] = round(loss_ratio[i]*100, 3)
+        _df(loss_ratio_disp, "Loss(plus LAE) Ratio (in %)")
+
+        avg_loss_ratio = 0
+        for i in loss_ratio.keys():
+            avg_loss_ratio+=loss_ratio[i]
+        avg_loss_ratio/=len(loss_ratio.keys())
+        st.write("Average loss ratio = ",round(avg_loss_ratio*100,2),"%")
+
+        if(avg_loss_ratio <= permissibleLR):
+            st.write("Since, average loss ratio %.3f is less than permissible loss ratio %.3f,\nThe Company met underwriting profit expectations.\n"%(avg_loss_ratio,permissibleLR))
+        else :
+            st.write("Since, average loss ratio %.3f is greater than permissible loss ratio %.3f,\nThe Company did not meet underwriting profit expectations.\n"%(avg_loss_ratio,permissibleLR))
+
+        # find overall rate level indicated change
+        indicated_avg_rate_change = ((avg_loss_ratio+fixed_exp_provision)/(1-variable_exp_provision-profit_provision)) - 1
+        st.write("Indicated average rate change for is=",round(indicated_avg_rate_change*100,4),"%")
 
