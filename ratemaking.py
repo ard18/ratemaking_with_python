@@ -422,9 +422,8 @@ with tab1:
         https://www.casact.org/abstract/generalized-earned-premium-rate-adjustment-factors
 
         We exclude any fluctuations arising due to legal changes.
-        ## Adjusting Premiums for Rate Changes
         """
-
+        st.write('## Adjusting Premiums for Rate Changes')
         # Net Premium Earned (Earned Premium - Ceded Earned Premium(or Reinsurance costs))
         net_prem_earned = {}
         for i in range(1988,1998):
