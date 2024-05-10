@@ -848,15 +848,15 @@ with tab2:
 
 
         """## Our Assumptions are:
-        ### --> Policies are written uniformly over time.
-        ### --> Premiums are earned uniformly over the policy period.
-        ### --> Losses occur uniformly over the policy period.
-        ### --> Policies have annual terms.
-
-        ## Trend losses for inflation.
-        ##### Our experience periods are the historical accident years from 1988 to 1997.
-        ##### We assume future policy period begins on Jan 1, 1998 and inflation rate will be in effect for 12 months. Thus our forecast period average accident date is:
-        ##### Midpoint of the period 1/1/1998 to 12/31/1999 = 1/1/1999
+        --> Policies are written uniformly over time.
+        --> Premiums are earned uniformly over the policy period.
+        --> Losses occur uniformly over the policy period.
+        --> Policies have annual terms.
+        """
+        """## Trend losses for inflation.
+        Our experience periods are the historical accident years from 1988 to 1997.
+        We assume future policy period begins on Jan 1, 1998 and inflation rate will be in effect for 12 months. Thus our forecast period average accident date is:
+        Midpoint of the period 1/1/1998 to 12/31/1999 = 1/1/1999
         """
         col20, col21, col22 = st.columns(3)
         loss_inf_period = {}
@@ -893,9 +893,9 @@ with tab2:
 
 
         """## Trend Premiums for inflation.
-        ##### Trend will be estimated from earned premium data. The trend period will be from the average earned date in each historical period to the average earned date at the new rate level. Because of the uniform assumption, the average earned date of a period is the midpoint of the first and last dates that premiums could be earned in that period. So, these dates will depend on the policy term length.
-        ##### Future policy period begins in Jan 1, 1998. Inflation rate will be in effect for 12 months. Thus our forecast period average earned date is:
-        ##### Midpoint of the period 1/1/1998 to 12/31/1999 = 1/1/1999
+        Trend will be estimated from earned premium data. The trend period will be from the average earned date in each historical period to the average earned date at the new rate level. Because of the uniform assumption, the average earned date of a period is the midpoint of the first and last dates that premiums could be earned in that period. So, these dates will depend on the policy term length.
+        Future policy period begins in Jan 1, 1998. Inflation rate will be in effect for 12 months. Thus our forecast period average earned date is:
+        Midpoint of the period 1/1/1998 to 12/31/1999 = 1/1/1999
         """
         col23, col24, col25 = st.columns(3)
         prem_inf_period = {}
@@ -938,7 +938,7 @@ with tab3:
     with st.expander("Overall Indication"):
         """# Expenses and Profits
 
-        ## Assume fixed expense provision and variable expense provision. Also assume underwiting profit provision.
+        Assume fixed expense provision and variable expense provision. Also assume underwiting profit provision.
         """
 
         fixed_exp_provision = 0.10       # 10%
