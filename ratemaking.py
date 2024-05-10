@@ -423,7 +423,7 @@ with tab1:
 
         We exclude any fluctuations arising due to legal changes.
         """
-        st.write('## Adjusting Premiums for Rate Changes')
+        st.write('## _Adjusting Premiums for Rate Changes_')
         # Net Premium Earned (Earned Premium - Ceded Earned Premium(or Reinsurance costs))
         net_prem_earned = {}
         for i in range(1988,1998):
