@@ -982,5 +982,5 @@ with tab3:
 
         # find overall rate level indicated change
         indicated_avg_rate_change = ((avg_loss_ratio+fixed_exp_provision)/(1-variable_exp_provision-profit_provision)) - 1
-        st.write("Indicated average rate change for is=",round(indicated_avg_rate_change*100,4),"%")
+        st.write("Indicated average rate change is=",round(indicated_avg_rate_change*100,4),"%")
 
